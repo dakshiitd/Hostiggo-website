@@ -15,15 +15,13 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#f0f2f5]">
       <Navbar />
       <HeroSection />
-
       <div className="container-main py-8 space-y-10">
         <PopularStays title="Popular stays in Delhi" properties={DELHI_PROPERTIES} />
-        <PopularStays title="Popular stays in Dehradun" properties={DEHRADUN_PROPERTIES} />
+        <PopularStays title="Popular stays in Himachal Pradesh" properties={DEHRADUN_PROPERTIES} />
         <CTABanner />
-        <PopularStays title="Popular stays in Delhi" properties={DELHI_PROPERTIES_2} />
-        <PopularStays title="Popular stays in Delhi" properties={DELHI_PROPERTIES_3} />
+        <PopularStays title="Popular stays in Rajasthan & Goa" properties={DELHI_PROPERTIES_2} />
+        <PopularStays title="Popular stays in South India" properties={DELHI_PROPERTIES_3} />
       </div>
-
       <Footer />
     </div>
   );

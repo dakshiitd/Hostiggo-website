@@ -1,16 +1,3 @@
-export interface Property {
-  id: string;
-  name: string;
-  location: string;
-  rating: number;
-  reviewCount: number;
-  pricePerNight: number;
-  imageUrl: string;
-  isFavorite?: boolean;
-  isNew?: boolean;
-  amenities?: string[];
-}
-
 export interface Destination {
   id: string;
   name: string;
@@ -26,7 +13,58 @@ export interface GuestCount {
   pets: boolean;
 }
 
-export interface SearchParams {
+export interface Property {
+  id: string;
+  propertyName: string;
+  city: string;
+  state: string;
+  price: number;
+  originalPrice?: number;
+  rating: number;
+  reviewCount: number;
+  amenities: string[];
+  propertyType: string;
+  images: string[];
+  maxGuests: number;
+  isFavorite?: boolean;
+  isNew?: boolean;
+  isInstantBook?: boolean;
+  freeCancellation?: boolean;
+  breakfast?: boolean;
+  parking?: boolean;
+  wifi?: boolean;
+  ac?: boolean;
+  pool?: boolean;
+  kitchen?: boolean;
+  balcony?: boolean;
+  mountainView?: boolean;
+  bedType?: string;
+  description?: string;
+  coordinates?: { lat: number; lng: number };
+}
+
+export interface SearchFilters {
+  priceMin: number;
+  priceMax: number;
+  guestRating: number | null;
+  propertyTypes: string[];
+  amenities: string[];
+  bedTypes: string[];
+  freeCancellation: boolean;
+  breakfast: boolean;
+  parking: boolean;
+  wifi: boolean;
+  ac: boolean;
+}
+
+export type SortOption =
+  | "recommended"
+  | "price_asc"
+  | "price_desc"
+  | "top_rated"
+  | "most_popular";
+
+export interface SearchState {
   destination: string;
   checkIn: Date | null;
   checkOut: Date | null;

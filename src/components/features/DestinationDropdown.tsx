@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, MapPin, Navigation } from "lucide-react";
+import { MapPin, Clock, Navigation } from "lucide-react";
 import { SUGGESTED_DESTINATIONS } from "@/constants/data";
-import type { Destination } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface DestinationDropdownProps {
   value: string;
@@ -9,111 +9,110 @@ interface DestinationDropdownProps {
   onClose: () => void;
 }
 
+const RECENT = ["New Delhi", "Manali", "Shimla"];
+
 export default function DestinationDropdown({ value, onChange, onClose }: DestinationDropdownProps) {
   const [query, setQuery] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+  useEffect(() => { inputRef.current?.focus(); }, []);
 
-  const filtered = query.trim().length > 0
-    ? SUGGESTED_DESTINATIONS.filter(
-        (d) =>
-          d.name.toLowerCase().includes(query.toLowerCase()) ||
-          d.state.toLowerCase().includes(query.toLowerCase())
+  const filtered = query.trim()
+    ? SUGGESTED_DESTINATIONS.filter(d =>
+        d.name.toLowerCase().includes(query.toLowerCase()) ||
+        d.state.toLowerCase().includes(query.toLowerCase())
       )
     : SUGGESTED_DESTINATIONS;
 
-  const handleSelect = (dest: Destination) => {
-    onChange(dest.name);
-    onClose();
-  };
+  const handleSelect = (name: string) => { onChange(name); onClose(); };
 
   return (
-    <div className="dropdown-panel animate-fade-in-down w-[420px] max-w-[92vw]">
-      {/* Search input */}
-      <div className="p-3 border-b border-gray-100">
-        <div className="flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 focus-within:border-blue-400 focus-within:bg-white transition-colors">
-          <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
+    <div className="dropdown-panel animate-fade-in-down w-[340px] max-w-[92vw]">
+      {/* Input */}
+      <div className="p-3 border-b border-gray-50">
+        <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
+          <MapPin className="w-4 h-4 text-blue-500 flex-shrink-0" />
           <input
             ref={inputRef}
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search destinations or properties"
-            className="flex-1 bg-transparent text-[13px] text-gray-800 placeholder-gray-400 outline-none"
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search destinations..."
+            className="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none font-medium"
           />
           {query && (
-            <button
-              onClick={() => setQuery("")}
-              className="w-4 h-4 bg-gray-300 hover:bg-gray-400 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
-            >
-              <span className="text-white text-[10px] font-bold leading-none">×</span>
-            </button>
+            <button onClick={() => setQuery("")} className="text-gray-400 hover:text-gray-600 transition-colors text-xs font-bold">✕</button>
           )}
         </div>
       </div>
 
-      {/* Suggestions list */}
-      <div className="p-2 max-h-[360px] overflow-y-auto scrollbar-hide">
-        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2 px-2 pt-1">
-          Suggested destinations
-        </p>
-
-        {filtered.length > 0 ? (
+      <div className="py-2 max-h-[340px] overflow-y-auto scrollbar-hide">
+        {/* Current location */}
+        <button
+          onClick={() => handleSelect("Current location")}
+          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-blue-50 transition-colors text-left group"
+        >
+          <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
+            <Navigation className="w-4 h-4 text-blue-600" />
+          </div>
           <div>
-            {filtered.slice(0, 8).map((dest) => (
+            <p className="text-[13px] font-semibold text-gray-800">Use current location</p>
+            <p className="text-[11px] text-gray-400">Near me stays</p>
+          </div>
+        </button>
+
+        {/* Recent if no query */}
+        {!query.trim() && (
+          <>
+            <p className="px-4 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Recent searches</p>
+            {RECENT.map(r => (
               <button
-                key={dest.id}
-                onClick={() => handleSelect(dest)}
-                className="w-full flex items-center gap-3 px-2 py-2.5 hover:bg-gray-50 rounded-xl transition-colors text-left group"
+                key={r}
+                onClick={() => handleSelect(r)}
+                className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors text-left"
               >
-                {/* City thumbnail */}
-                <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
-                  <img
-                    src={dest.imageUrl}
-                    alt={dest.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src =
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(dest.name)}&background=2563eb&color=fff&size=48&bold=true`;
-                    }}
-                  />
+                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-3.5 h-3.5 text-gray-500" />
                 </div>
-
-                {/* City info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-gray-800 leading-tight">{dest.name}</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">{dest.state}</p>
-                </div>
-
-                {/* Stay count */}
-                <div className="text-right flex-shrink-0">
-                  <p className="text-[11px] text-gray-400">
-                    {dest.stayCount.toLocaleString("en-IN")} stays
-                  </p>
-                </div>
+                <span className="text-[13px] font-medium text-gray-700">{r}</span>
               </button>
             ))}
+            <p className="px-4 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Popular destinations</p>
+          </>
+        )}
+
+        {/* Destination list */}
+        {filtered.length === 0 ? (
+          <div className="px-4 py-6 text-center">
+            <p className="text-sm text-gray-400 font-medium">No destinations found</p>
+            <p className="text-xs text-gray-300 mt-1">Try a different city or state</p>
           </div>
         ) : (
-          <div className="py-10 flex flex-col items-center text-gray-400">
-            <MapPin className="w-8 h-8 mb-2 opacity-40" />
-            <p className="text-sm font-medium text-gray-500">No destinations found</p>
-            <p className="text-xs text-gray-400 mt-1">Try a different search</p>
-          </div>
+          filtered.map(dest => (
+            <button
+              key={dest.id}
+              onClick={() => handleSelect(dest.name)}
+              className={cn(
+                "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-blue-50 transition-colors text-left group",
+                value === dest.name && "bg-blue-50"
+              )}
+            >
+              <img
+                src={dest.imageUrl}
+                alt={dest.name}
+                className="w-10 h-10 rounded-xl object-cover flex-shrink-0"
+                loading="lazy"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-semibold text-gray-800 truncate">{dest.name}</p>
+                <p className="text-[11px] text-gray-400 truncate">{dest.state} · {dest.stayCount.toLocaleString("en-IN")} stays</p>
+              </div>
+              {value === dest.name && (
+                <div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+              )}
+            </button>
+          ))
         )}
-      </div>
-
-      {/* Use current location */}
-      <div className="border-t border-gray-100 p-3">
-        <button className="w-full flex items-center gap-2.5 px-2 py-2 hover:bg-blue-50 rounded-xl transition-colors text-blue-600 group">
-          <div className="w-8 h-8 bg-blue-100 group-hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors">
-            <Navigation className="w-3.5 h-3.5 text-blue-600" />
-          </div>
-          <span className="text-[13px] font-semibold">Use my current location</span>
-        </button>
       </div>
     </div>
   );
