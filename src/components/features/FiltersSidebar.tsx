@@ -48,15 +48,18 @@ function CheckChip({ label, checked, onChange }: { label: string; checked: boole
 
 function CheckRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <label className="flex items-center gap-2.5 cursor-pointer py-1 group">
+    <button
+      onClick={() => onChange(!checked)}
+      className="w-full flex items-center gap-2.5 cursor-pointer py-1.5 group text-left"
+    >
       <div className={cn(
         "w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all",
         checked ? "bg-blue-600 border-blue-600" : "border-gray-300 group-hover:border-blue-400"
       )}>
-        {checked && <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3L3 5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+        {checked && <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3L3 5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
       </div>
       <span className={cn("text-[13px] transition-colors", checked ? "text-gray-800 font-semibold" : "text-gray-600 group-hover:text-gray-800")}>{label}</span>
-    </label>
+    </button>
   );
 }
 

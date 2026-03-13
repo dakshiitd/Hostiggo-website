@@ -28,6 +28,7 @@ export interface Property {
   maxGuests: number;
   isFavorite?: boolean;
   isNew?: boolean;
+  distanceFromCenter?: string;
   isInstantBook?: boolean;
   freeCancellation?: boolean;
   breakfast?: boolean;
@@ -62,7 +63,10 @@ export type SortOption =
   | "price_asc"
   | "price_desc"
   | "top_rated"
-  | "most_popular";
+  | "most_popular"
+  | "newest"
+  | "distance"
+  | "best_value";
 
 export interface SearchState {
   destination: string;

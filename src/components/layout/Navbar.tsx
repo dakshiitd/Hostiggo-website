@@ -15,7 +15,7 @@ export default function Navbar() {
             <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
               <Home className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
             </div>
-            <span className="font-extrabold text-gray-900 text-[15px] tracking-tight">
+            <span className="font-extrabold text-gray-900 text-[16px] tracking-tight uppercase">
               Hosti<span className="text-blue-600">ggo</span>
             </span>
           </Link>
@@ -24,7 +24,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-0.5">
             <button className="flex items-center gap-1 text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors text-[13px] font-medium">
               <IndianRupee className="w-3.5 h-3.5" strokeWidth={2} />
-              <span>INR</span>
+              <span>INR.</span>
             </button>
             <button className="flex items-center gap-1 text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors text-[13px] font-medium">
               <Globe className="w-3.5 h-3.5" strokeWidth={1.8} />
@@ -34,7 +34,7 @@ export default function Navbar() {
             <button className="text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors text-[13px] font-medium ml-1">
               Sign in
             </button>
-            <button className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-4 py-1.5 rounded-lg text-[13px] font-semibold transition-colors ml-1 shadow-sm">
+            <button className="bg-[#005a9c] hover:bg-[#004a80] active:bg-[#003a66] text-white px-4 py-1.5 rounded-lg text-[13px] font-semibold transition-colors ml-1 shadow-sm">
               New user
             </button>
             <button
