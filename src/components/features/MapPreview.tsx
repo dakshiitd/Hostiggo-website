@@ -1,71 +1,126 @@
+import { useEffect, useRef, useState } from "react";
 import { MapPin } from "lucide-react";
 
 interface MapPreviewProps {
   city?: string;
   count?: number;
+  coordinates?: { lat: number; lng: number };
 }
 
-// Fake marker positions
-const MARKERS = [
-  { x: 38, y: 42 },
-  { x: 55, y: 30 },
-  { x: 48, y: 58 },
-  { x: 65, y: 45 },
-  { x: 30, y: 65 },
-  { x: 70, y: 25 },
-  { x: 25, y: 38 },
-];
+export default function MapPreview({ city = "New Delhi", count = 0, coordinates }: MapPreviewProps) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const leafletMapRef = useRef<any>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
-export default function MapPreview({ city = "New Delhi", count = 0 }: MapPreviewProps) {
+  // City center fallback
+  const CITY_CENTERS: Record<string, [number, number]> = {
+    "New Delhi": [28.6139, 77.2090],
+    "Manali": [32.2396, 77.1887],
+    "Shimla": [31.1048, 77.1734],
+    "Jaipur": [26.9124, 75.7873],
+    "Bangalore": [12.9716, 77.5946],
+    "Rishikesh": [30.0869, 78.2676],
+    "Goa": [15.2993, 74.1240],
+    "Dharamshala": [32.2190, 76.3234],
+    "Kasol": [32.0109, 77.3130],
+    "Kolkata": [22.5726, 88.3639],
+  };
+
+  const getCenter = (): [number, number] => {
+    if (coordinates) return [coordinates.lat, coordinates.lng];
+    for (const [name, coords] of Object.entries(CITY_CENTERS)) {
+      if (city.toLowerCase().includes(name.toLowerCase())) return coords;
+    }
+    return [22.5937, 78.9629]; // India center
+  };
+
+  useEffect(() => {
+    if (!mapRef.current || leafletMapRef.current) return;
+
+    // Load Leaflet CSS
+    if (!document.querySelector('link[href*="leaflet"]')) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      document.head.appendChild(link);
+    }
+
+    const loadLeaflet = () => {
+      if ((window as any).L) {
+        initMap((window as any).L);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+      script.onload = () => initMap((window as any).L);
+      document.head.appendChild(script);
+    };
+    loadLeaflet();
+
+    return () => {
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
+      }
+    };
+  }, []);
+
+  const initMap = (L: any) => {
+    if (!mapRef.current || leafletMapRef.current) return;
+    const center = getCenter();
+    const map = L.map(mapRef.current, {
+      center,
+      zoom: 11,
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+    });
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+    }).addTo(map);
+
+    // Center marker
+    const icon = L.divIcon({
+      className: "",
+      html: `<div style="background:#2563eb;width:12px;height:12px;border-radius:50%;border:2.5px solid white;box-shadow:0 2px 6px rgba(37,99,235,0.5)"></div>`,
+      iconSize: [12, 12],
+      iconAnchor: [6, 6],
+    });
+    L.marker(center, { icon }).addTo(map);
+
+    leafletMapRef.current = map;
+    setMapLoaded(true);
+  };
+
+  // Update map center when city changes
+  useEffect(() => {
+    if (!leafletMapRef.current || !mapLoaded) return;
+    const center = getCenter();
+    leafletMapRef.current.setView(center, 11);
+  }, [city, coordinates, mapLoaded]);
+
   return (
     <div className="rounded-2xl overflow-hidden border border-gray-100 relative" style={{ height: 160 }}>
-      {/* Map background */}
-      <img
-        src={`https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(city)}&zoom=12&size=300x160&style=feature:all|saturation:-20&key=DEMO`}
-        alt=""
-        className="hidden"
-      />
-      {/* Fallback SVG map */}
-      <svg width="100%" height="160" className="absolute inset-0" viewBox="0 0 280 160">
-        <rect width="280" height="160" fill="#e8f0fe" />
-        {/* roads */}
-        <line x1="0" y1="80" x2="280" y2="80" stroke="#c5d4f5" strokeWidth="8" />
-        <line x1="140" y1="0" x2="140" y2="160" stroke="#c5d4f5" strokeWidth="8" />
-        <line x1="0" y1="40" x2="280" y2="55" stroke="#d0ddf8" strokeWidth="4" />
-        <line x1="0" y1="120" x2="280" y2="108" stroke="#d0ddf8" strokeWidth="4" />
-        <line x1="70" y1="0" x2="55" y2="160" stroke="#d0ddf8" strokeWidth="3" />
-        <line x1="200" y1="0" x2="210" y2="160" stroke="#d0ddf8" strokeWidth="3" />
-        {/* blocks */}
-        <rect x="10" y="10" width="50" height="25" rx="3" fill="#d4e0fb" />
-        <rect x="70" y="10" width="60" height="25" rx="3" fill="#dce7fc" />
-        <rect x="150" y="10" width="45" height="25" rx="3" fill="#d4e0fb" />
-        <rect x="205" y="10" width="65" height="25" rx="3" fill="#dce7fc" />
-        <rect x="10" y="90" width="55" height="30" rx="3" fill="#d4e0fb" />
-        <rect x="75" y="90" width="55" height="30" rx="3" fill="#dce7fc" />
-        <rect x="150" y="90" width="55" height="30" rx="3" fill="#d4e0fb" />
-        <rect x="215" y="90" width="55" height="30" rx="3" fill="#dce7fc" />
-        <rect x="10" y="130" width="50" height="20" rx="3" fill="#dce7fc" />
-        <rect x="70" y="128" width="60" height="22" rx="3" fill="#d4e0fb" />
-      </svg>
+      <div ref={mapRef} className="w-full h-full" />
 
-      {/* Markers */}
-      {MARKERS.map((m, i) => (
-        <div
-          key={i}
-          className="absolute flex items-center justify-center"
-          style={{ left: `${m.x}%`, top: `${m.y}%`, transform: "translate(-50%, -100%)" }}
-        >
-          <div className="bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-md whitespace-nowrap">
-            ₹{(20000 + i * 3000).toLocaleString("en-IN")}
+      {!mapLoaded && (
+        <div className="absolute inset-0 bg-blue-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-1.5" />
+            <p className="text-[11px] text-blue-500 font-medium">Loading…</p>
           </div>
         </div>
-      ))}
+      )}
 
       {/* Overlay label */}
-      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-white/90 to-transparent py-2 px-3">
+      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-white/90 to-transparent py-2 px-3 pointer-events-none">
         <p className="text-[11px] font-semibold text-gray-600 flex items-center gap-1">
           <MapPin className="w-3 h-3 text-blue-500" />
-          {city} · {count} properties on map
+          {city} · {count} properties
         </p>
       </div>
     </div>

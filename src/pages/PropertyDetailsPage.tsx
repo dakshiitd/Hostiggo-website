@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Star, Heart, MapPin, Wifi, Car, Coffee, Zap, Droplets, UtensilsCrossed, ArrowLeft, Mountain, CheckCircle, Users, BedDouble, ChevronLeft, ChevronRight, X, CalendarDays } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
@@ -23,6 +23,79 @@ const MOCK_REVIEWS = [
   { name: "Rahul M.", rating: 4, comment: "Great location and amenities. Breakfast was delicious. Will definitely visit again!", date: "Jan 2025" },
   { name: "Anita K.", rating: 5, comment: "One of the best stays I've had. Beautiful property with stunning views.", date: "Dec 2024" },
 ];
+
+// ── Inline property location map ──────────────────────────────────────
+function PropertyMap({ property }: { property: import("@/types").Property }) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const leafletMapRef = useRef<any>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  const CITY_CENTERS: Record<string, [number, number]> = {
+    "New Delhi": [28.6139, 77.2090], "Manali": [32.2396, 77.1887],
+    "Shimla": [31.1048, 77.1734], "Jaipur": [26.9124, 75.7873],
+    "Bangalore": [12.9716, 77.5946], "Rishikesh": [30.0869, 78.2676],
+    "Goa": [15.2993, 74.1240], "Dharamshala": [32.2190, 76.3234],
+    "Kasol": [32.0109, 77.3130], "Kolkata": [22.5726, 88.3639],
+  };
+
+  const getCenter = (): [number, number] => {
+    if (property.coordinates) return [property.coordinates.lat, property.coordinates.lng];
+    for (const [name, coords] of Object.entries(CITY_CENTERS)) {
+      if (property.city.toLowerCase().includes(name.toLowerCase())) return coords;
+    }
+    return [22.5937, 78.9629];
+  };
+
+  useEffect(() => {
+    if (!mapRef.current || leafletMapRef.current) return;
+    if (!document.querySelector('link[href*="leaflet"]')) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      document.head.appendChild(link);
+    }
+    const init = (L: any) => {
+      if (!mapRef.current || leafletMapRef.current) return;
+      const center = getCenter();
+      const map = L.map(mapRef.current, {
+        center, zoom: 14,
+        zoomControl: true, attributionControl: false,
+        scrollWheelZoom: false,
+      });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+      const icon = L.divIcon({
+        className: "",
+        html: `<div style="background:#2563eb;width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 3px 10px rgba(37,99,235,0.55)"></div>`,
+        iconSize: [18, 18], iconAnchor: [9, 9],
+      });
+      L.marker(center, { icon }).addTo(map)
+        .bindPopup(`<b style="font-size:13px">${property.propertyName}</b><br/><span style="font-size:11px;color:#6b7280">${property.city}, ${property.state}</span>`, { maxWidth: 200 })
+        .openPopup();
+      leafletMapRef.current = map;
+      setLoaded(true);
+    };
+    if ((window as any).L) { init((window as any).L); return; }
+    const script = document.createElement("script");
+    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    script.onload = () => init((window as any).L);
+    document.head.appendChild(script);
+    return () => { if (leafletMapRef.current) { leafletMapRef.current.remove(); leafletMapRef.current = null; } };
+  }, []);
+
+  return (
+    <div className="rounded-xl overflow-hidden border border-gray-100 relative" style={{ height: 240 }}>
+      <div ref={mapRef} className="w-full h-full" />
+      {!loaded && (
+        <div className="absolute inset-0 bg-blue-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-7 h-7 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            <p className="text-[12px] text-blue-500 font-medium">Loading map…</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function PropertyDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -196,27 +269,7 @@ export default function PropertyDetailsPage() {
             {/* Map */}
             <div className="bg-white rounded-2xl p-5" style={{ boxShadow: "0 1px 8px rgba(0,0,0,0.07)" }}>
               <h2 className="text-[15px] font-bold text-gray-800 mb-3">Location</h2>
-              <div className="rounded-xl overflow-hidden border border-gray-100" style={{ height: 200 }}>
-                <svg width="100%" height="200" viewBox="0 0 400 200" className="w-full">
-                  <rect width="400" height="200" fill="#e8f0fe" />
-                  <line x1="0" y1="100" x2="400" y2="100" stroke="#c5d4f5" strokeWidth="10" />
-                  <line x1="200" y1="0" x2="200" y2="200" stroke="#c5d4f5" strokeWidth="10" />
-                  <line x1="0" y1="50" x2="400" y2="65" stroke="#d0ddf8" strokeWidth="5" />
-                  <line x1="0" y1="150" x2="400" y2="140" stroke="#d0ddf8" strokeWidth="5" />
-                  <rect x="20" y="15" width="70" height="30" rx="4" fill="#d4e0fb" />
-                  <rect x="100" y="15" width="90" height="30" rx="4" fill="#dce7fc" />
-                  <rect x="220" y="15" width="70" height="30" rx="4" fill="#d4e0fb" />
-                  <rect x="310" y="15" width="80" height="30" rx="4" fill="#dce7fc" />
-                  <rect x="20" y="115" width="80" height="35" rx="4" fill="#d4e0fb" />
-                  <rect x="115" y="115" width="75" height="35" rx="4" fill="#dce7fc" />
-                  <rect x="220" y="115" width="80" height="35" rx="4" fill="#d4e0fb" />
-                  <rect x="315" y="115" width="75" height="35" rx="4" fill="#dce7fc" />
-                  {/* Pin */}
-                  <circle cx="200" cy="100" r="16" fill="#2563eb" opacity="0.2" />
-                  <circle cx="200" cy="100" r="8" fill="#2563eb" />
-                  <circle cx="200" cy="100" r="3" fill="white" />
-                </svg>
-              </div>
+              <PropertyMap property={property} />
               <p className="text-[12px] text-gray-400 mt-2 flex items-center gap-1">
                 <MapPin className="w-3 h-3 text-blue-500" />
                 {property.city}, {property.state}
