@@ -13,6 +13,34 @@ export interface GuestCount {
   pets: boolean;
 }
 
+export interface AmenityItem {
+  name: string;
+  icon: string;
+  available: boolean;
+}
+
+export interface Review {
+  id: string;
+  userName: string;
+  userAvatar: string;
+  rating: number;
+  reviewText: string;
+  reviewDate: string;
+}
+
+export interface Host {
+  id: string;
+  name: string;
+  avatar: string;
+  rating: number;
+  tripsHosted: number;
+  joinDate: string;
+  bio?: string;
+  responseRate?: number;
+  responseTime?: string;
+  isSuperhost?: boolean;
+}
+
 export interface Property {
   id: string;
   propertyName: string;
@@ -23,6 +51,7 @@ export interface Property {
   rating: number;
   reviewCount: number;
   amenities: string[];
+  amenityDetails?: AmenityItem[];
   propertyType: string;
   images: string[];
   maxGuests: number;
@@ -41,6 +70,16 @@ export interface Property {
   bedType?: string;
   description?: string;
   coordinates?: { lat: number; lng: number };
+  host?: Host;
+  reviews?: Review[];
+  ratingBreakdown?: {
+    cleanliness: number;
+    accuracy: number;
+    communication: number;
+    location: number;
+    checkIn: number;
+    value: number;
+  };
 }
 
 export interface SearchFilters {
