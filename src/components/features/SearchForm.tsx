@@ -155,7 +155,7 @@ export function CompactSearchBar() {
       {/* Search Button */}
       <button
         onClick={handleSearch}
-        className="h-[52px] px-8 bg-blue-500 border-2 border-white/20 hover:bg-blue-600 text-white font-bold text-[15px] rounded-full transition-all shadow-md active:scale-95 flex-shrink-0"
+        className="h-[52px] px-8 bg-primary-gradient border-2 border-white/20 text-white font-bold text-[15px] rounded-full transition-all shadow-md active:scale-95 flex-shrink-0"
       >
         Search
       </button>
@@ -310,7 +310,7 @@ export default function SearchForm() {
         <div className="mt-2 flex justify-center">
           <button
             onClick={handleSearch}
-            className="w-full max-w-[240px] flex items-center justify-center bg-[#0266b3] hover:bg-[#025699] active:bg-[#02467f] text-white font-bold text-[15px] rounded-full px-6 py-3.5 transition-colors shadow-md hover:shadow-lg"
+            className="w-full max-w-[240px] flex items-center justify-center bg-primary-gradient text-white font-bold text-[15px] rounded-full px-6 py-3.5 transition-all shadow-md hover:opacity-90 active:scale-95"
           >
             Search
           </button>

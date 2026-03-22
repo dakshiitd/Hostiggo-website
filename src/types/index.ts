@@ -56,6 +56,11 @@ export interface SearchFilters {
   parking: boolean;
   wifi: boolean;
   ac: boolean;
+  privateRoom: boolean;
+  sharedRoom: boolean;
+  doubleBed: boolean;
+  coupleFriendly: boolean;
+  familyFriendly: boolean;
 }
 
 export type SortOption =

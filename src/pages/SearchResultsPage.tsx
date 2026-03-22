@@ -87,7 +87,7 @@ export default function SearchResultsPage() {
     if (key === "propertyTypes" && value) updateFilter("propertyTypes", filters.propertyTypes.filter(v => v !== value));
     else if (key === "amenities" && value) updateFilter("amenities", filters.amenities.filter(v => v !== value));
     else if (key === "bedTypes" && value) updateFilter("bedTypes", filters.bedTypes.filter(v => v !== value));
-    else if (key === "priceMin") { updateFilter("priceMin", 0); updateFilter("priceMax", 100000); }
+    else if (key === "priceMin") { updateFilter("priceMin", 0); updateFilter("priceMax", 15000); }
     else if (key === "guestRating") updateFilter("guestRating", null);
     else updateFilter(key, false as never);
   };
@@ -99,11 +99,11 @@ export default function SearchResultsPage() {
   const showList = viewMode === "list" || viewMode === "split";
 
   return (
-    <div className="min-h-screen bg-[#f0f2f5]">
+    <div className="min-h-screen bg-[#FFFEF9]">
       <Navbar />
 
       {/* Search bar strip */}
-      <div className="bg-[#005a9c] sticky top-14 z-40 py-3.5 px-4 sm:px-6 lg:px-8 shadow-md">
+      <div className="bg-[#005a9c] sticky top-16 z-40 py-3.5 px-4 sm:px-6 lg:px-8 shadow-md">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
           <div className="flex-1">
             <CompactSearchBar />
@@ -117,7 +117,7 @@ export default function SearchResultsPage() {
       {viewMode === "map" && (
         <div className="flex" style={{ height: "calc(100vh - 112px)" }}>
           {/* Sidebar */}
-          <div className="hidden lg:block w-[240px] flex-shrink-0 overflow-y-auto bg-[#f0f2f5] p-4">
+          <div className="hidden lg:block w-[320px] flex-shrink-0 overflow-y-auto bg-[#FFFEF9] p-4">
             <FiltersSidebar
               filters={filters}
               onChange={updateFilter}
@@ -259,7 +259,7 @@ function ListResults({ paginated, sorted, hasMore, onLoadMore, onHover, resetFil
         <div className="text-5xl mb-4">🏨</div>
         <h3 className="text-lg font-bold text-gray-700 mb-2">No properties found</h3>
         <p className="text-gray-400 text-sm mb-4">Try adjusting your filters or search for a different destination.</p>
-        <button onClick={resetFilters} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors">
+        <button onClick={resetFilters} className="bg-primary-gradient text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-95">
           Clear all filters
         </button>
       </div>
