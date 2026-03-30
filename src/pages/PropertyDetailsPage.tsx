@@ -5,7 +5,7 @@ import {
   UtensilsCrossed, ArrowLeft, Mountain, CheckCircle, Users,
   BedDouble, ChevronLeft, ChevronRight, X, CalendarDays,
   Wind, MessageSquare, Award, Shield, Clock, ChevronDown,
-  Share2, GridIcon, ExternalLink
+  Share2, GridIcon, ExternalLink, Filter
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -474,7 +474,15 @@ function SuggestedStays({ current }: { current: Property }) {
 }
 
 // ── 8. Booking Widget ────────────────────────────────────────────────
-function BookingWidget({ property }: { property: Property }) {
+function BookingWidget({
+  property,
+  onNightsChange,
+  onGuestsChange,
+}: {
+  property: Property;
+  onNightsChange?: (n: number) => void;
+  onGuestsChange?: (g: number) => void;
+}) {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
@@ -486,6 +494,10 @@ function BookingWidget({ property }: { property: Property }) {
   const nights = checkIn && checkOut
     ? Math.max(0, Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000))
     : 0;
+
+  // Sync to sticky bar
+  useEffect(() => { onNightsChange?.(nights); }, [nights]);
+  useEffect(() => { onGuestsChange?.(guests); }, [guests]);
 
   const subtotal = property.price * (nights || 1);
   const serviceFee = Math.round(subtotal * 0.08);
@@ -529,7 +541,7 @@ function BookingWidget({ property }: { property: Property }) {
               type="date"
               value={checkIn}
               min={today}
-              onChange={e => { setCheckIn(e.target.value); setDateError(""); }}
+              onChange={e => { setCheckIn(e.target.value); setDateError(""); onNightsChange?.(0); }}
               className="w-full text-[12px] font-semibold text-gray-800 outline-none bg-transparent cursor-pointer"
             />
           </div>
@@ -623,16 +635,272 @@ function BookingWidget({ property }: { property: Property }) {
   );
 }
 
+// ── Reviews Modal ───────────────────────────────────────────────────
+const STAR_FILTERS = [
+  { label: "All", value: 0 },
+  { label: "5 stars", value: 5 },
+  { label: "4 stars", value: 4 },
+  { label: "3 stars", value: 3 },
+  { label: "2 stars", value: 2 },
+  { label: "1 star", value: 1 },
+];
+
+function ReviewsModal({
+  reviews,
+  rating,
+  reviewCount,
+  onClose,
+}: {
+  reviews: Review[];
+  rating: number;
+  reviewCount: number;
+  onClose: () => void;
+}) {
+  const [starFilter, setStarFilter] = useState(0);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  // Lock body scroll
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  const filtered = starFilter === 0
+    ? reviews
+    : reviews.filter(r => r.rating === starFilter);
+
+  const currentLabel = STAR_FILTERS.find(f => f.value === starFilter)?.label ?? "All";
+
+  return (
+    <div
+      className="fixed inset-0 z-[9998] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl w-full max-w-lg flex flex-col"
+        style={{
+          boxShadow: "0 24px 80px rgba(0,0,0,0.28)",
+          maxHeight: "82vh",
+          animation: "modalSlideUp 0.22s ease",
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 flex-shrink-0">
+          {/* Rating badge */}
+          <div className="flex items-center gap-1.5 bg-emerald-500 text-white px-2.5 py-1 rounded-lg">
+            <Star className="w-3.5 h-3.5 fill-white" />
+            <span className="text-[14px] font-extrabold">{rating.toFixed(1)}</span>
+          </div>
+          <div>
+            <span className="text-[15px] font-extrabold text-gray-800">{reviewCount} reviews</span>
+          </div>
+
+          {/* Star filter dropdown */}
+          <div className="relative ml-2">
+            <button
+              onClick={() => setFilterOpen(o => !o)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[12px] font-semibold transition-all",
+                filterOpen ? "border-blue-400 bg-blue-50 text-blue-700" : "border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300"
+              )}
+            >
+              <Filter className="w-3 h-3" />
+              {currentLabel}
+              <ChevronDown className={cn("w-3 h-3 transition-transform", filterOpen && "rotate-180")} />
+            </button>
+            {filterOpen && (
+              <div
+                className="absolute top-full left-0 mt-1 bg-white rounded-xl border border-gray-100 py-1 z-10 min-w-[120px]"
+                style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
+              >
+                {STAR_FILTERS.map(f => (
+                  <button
+                    key={f.value}
+                    onClick={() => { setStarFilter(f.value); setFilterOpen(false); }}
+                    className={cn(
+                      "w-full text-left px-4 py-2 text-[13px] transition-colors flex items-center gap-2",
+                      starFilter === f.value
+                        ? "text-blue-600 font-semibold bg-blue-50"
+                        : "text-gray-700 hover:bg-gray-50"
+                    )}
+                  >
+                    {f.value > 0 && (
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: f.value }).map((_, i) => (
+                          <Star key={i} className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
+                        ))}
+                      </div>
+                    )}
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Count badge */}
+          {starFilter !== 0 && (
+            <span className="text-[11px] text-gray-400 font-medium ml-1">
+              {filtered.length} result{filtered.length !== 1 ? "s" : ""}
+            </span>
+          )}
+
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="ml-auto w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Scrollable reviews body */}
+        <div ref={bodyRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-5" style={{ scrollbarWidth: "thin" }}>
+          {filtered.length === 0 ? (
+            <div className="py-10 text-center">
+              <div className="text-4xl mb-3">⭐</div>
+              <p className="text-[14px] font-semibold text-gray-500">No {starFilter}-star reviews yet.</p>
+              <button
+                onClick={() => setStarFilter(0)}
+                className="mt-3 text-[13px] text-blue-600 font-semibold underline"
+              >
+                Show all reviews
+              </button>
+            </div>
+          ) : (
+            filtered.map(review => (
+              <div key={review.id} className="pb-5 border-b border-gray-100 last:border-0 last:pb-0">
+                <div className="flex items-center gap-3 mb-2">
+                  <img
+                    src={review.userAvatar}
+                    alt={review.userName}
+                    className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                    loading="lazy"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-bold text-gray-800 leading-none">{review.userName}</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">{review.reviewDate}</p>
+                  </div>
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className={cn("w-3 h-3", i < review.rating ? "text-amber-400 fill-amber-400" : "text-gray-200 fill-gray-200")} />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-[13px] text-gray-600 leading-relaxed">{review.reviewText}</p>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Sticky Scroll Summary Bar ────────────────────────────────────────
+function StickyBookingBar({
+  property,
+  nights,
+  guests,
+  onReserve,
+  show,
+}: {
+  property: Property;
+  nights: number;
+  guests: number;
+  onReserve: () => void;
+  show: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "fixed top-0 inset-x-0 z-[999] bg-white border-b border-gray-200 transition-all duration-300",
+        show ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
+      )}
+      style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.10)" }}
+    >
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-4">
+        {/* Reserve button */}
+        <button
+          onClick={onReserve}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-bold text-[13px] transition-colors shadow-sm flex-shrink-0"
+        >
+          Reserve
+        </button>
+
+        {/* Price + info */}
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-[15px] font-extrabold text-gray-800">₹{property.price.toLocaleString("en-IN")}</span>
+          <span className="text-[12px] text-gray-400">/night</span>
+          {nights > 0 && (
+            <span className="text-[12px] text-gray-500 ml-2 font-medium">
+              · for {nights} night{nights !== 1 ? "s" : ""}
+            </span>
+          )}
+          {guests > 0 && (
+            <span className="text-[12px] text-gray-500 font-medium">
+              · {guests} Adult{guests !== 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={() => { navigator.clipboard?.writeText(window.location.href); }}
+            className="w-8 h-8 rounded-full border border-gray-200 hover:border-gray-300 bg-white flex items-center justify-center text-gray-500 hover:text-blue-600 transition-colors"
+            title="Share"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+          </button>
+          <button
+            className="w-8 h-8 rounded-full border border-gray-200 hover:border-rose-300 bg-white flex items-center justify-center text-gray-400 hover:text-rose-500 transition-colors"
+            title="Save"
+          >
+            <Heart className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Page ────────────────────────────────────────────────────────
 export default function PropertyDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const property = ALL_PROPERTIES.find(p => p.id === id);
 
-  const [liked, setLiked] = useState(property?.isFavorite ?? false);
+  const [liked, setLiked] = useState(!!property?.isFavorite);
   const [showAllAmenities, setShowAllAmenities] = useState(false);
-  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [reviewsModalOpen, setReviewsModalOpen] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
+  const [stickyBar, setStickyBar] = useState(false);
+  const [barNights, setBarNights] = useState(0);
+  const [barGuests, setBarGuests] = useState(1);
+  const galleryRef = useRef<HTMLDivElement>(null);
+
+  // Show sticky bar after scrolling past gallery
+  useEffect(() => {
+    const handleScroll = () => {
+      const galleryBottom = galleryRef.current
+        ? galleryRef.current.getBoundingClientRect().bottom
+        : 500;
+      setStickyBar(galleryBottom < 0);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => { window.scrollTo(0, 0); }, [id]);
 
@@ -656,13 +924,22 @@ export default function PropertyDetailsPage() {
   const amenities = property.amenityDetails ?? property.amenities.map(a => ({ name: a, icon: "wifi", available: true }));
   const visibleAmenities = showAllAmenities ? amenities : amenities.slice(0, 8);
   const reviews = property.reviews ?? [];
-  const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 3);
+  const previewReviews = reviews.slice(0, 3);
   const rb = property.ratingBreakdown;
 
   const descIsLong = (property.description?.length ?? 0) > 200;
 
   return (
     <div className="min-h-screen bg-[#f0f2f5]">
+      {/* Sticky booking summary bar */}
+      <StickyBookingBar
+        property={property}
+        nights={barNights}
+        guests={barGuests}
+        onReserve={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        show={stickyBar}
+      />
+
       <Navbar />
 
       <div className="container-main py-6 max-w-6xl mx-auto px-4 sm:px-6">
@@ -696,7 +973,9 @@ export default function PropertyDetailsPage() {
         </div>
 
         {/* ── 1. IMAGE GALLERY ── */}
-        <ImageGallery images={images} propertyName={property.propertyName} />
+        <div ref={galleryRef}>
+          <ImageGallery images={images} propertyName={property.propertyName} />
+        </div>
 
         {/* ── Main grid ── */}
         <div className="flex flex-col lg:flex-row gap-6 items-start">
@@ -837,17 +1116,22 @@ export default function PropertyDetailsPage() {
 
             {/* ── 6. RATINGS & REVIEWS ── */}
             <div className="bg-white rounded-2xl p-5" style={{ boxShadow: "0 1px 8px rgba(0,0,0,0.07)" }}>
-              {/* Overall rating */}
-              <div className="flex items-center gap-4 mb-5">
-                <div className="text-center">
+              <h2 className="text-[15px] font-bold text-gray-800 mb-4">Ratings &amp; reviews</h2>
+
+              {/* Overall rating + breakdown */}
+              <div className="flex items-start gap-5 mb-5">
+                {/* Score */}
+                <div className="text-center flex-shrink-0">
                   <p className="text-[42px] font-extrabold text-gray-800 leading-none">{property.rating.toFixed(1)}</p>
-                  <div className="flex justify-center mt-1">
+                  <div className="flex justify-center mt-1.5">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star key={i} className={cn("w-3.5 h-3.5", i < Math.round(property.rating) ? "text-amber-400 fill-amber-400" : "text-gray-200 fill-gray-200")} />
                     ))}
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-0.5 font-medium">{property.reviewCount} reviews</p>
+                  <p className="text-[11px] text-gray-400 mt-1 font-medium">{property.reviewCount} reviews</p>
                 </div>
+
+                {/* Bar breakdown */}
                 {rb && (
                   <div className="flex-1 space-y-2 pl-4 border-l border-gray-100">
                     <RatingBar label="Cleanliness" value={rb.cleanliness} />
@@ -860,23 +1144,60 @@ export default function PropertyDetailsPage() {
                 )}
               </div>
 
-              {/* Reviews list */}
+              {/* Preview reviews (3-column card layout) */}
               {reviews.length > 0 && (
                 <>
-                  <div className="space-y-4">
-                    {visibleReviews.map(review => (
-                      <ReviewCard key={review.id} review={review} />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    {previewReviews.map(review => (
+                      <div
+                        key={review.id}
+                        className="bg-gray-50 rounded-2xl p-4 border border-gray-100 flex flex-col gap-3"
+                      >
+                        {/* User info */}
+                        <div className="flex items-center gap-2.5">
+                          <img
+                            src={review.userAvatar}
+                            alt={review.userName}
+                            className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+                            loading="lazy"
+                          />
+                          <div className="min-w-0">
+                            <p className="text-[12px] font-bold text-gray-800 truncate">{review.userName}</p>
+                            <p className="text-[10px] text-gray-400">{review.reviewDate}</p>
+                          </div>
+                        </div>
+                        {/* Stars */}
+                        <div className="flex gap-0.5">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star key={i} className={cn("w-3 h-3", i < review.rating ? "text-amber-400 fill-amber-400" : "text-gray-200 fill-gray-200")} />
+                          ))}
+                        </div>
+                        {/* Text */}
+                        <p className="text-[12px] text-gray-600 leading-relaxed line-clamp-4 flex-1">
+                          {review.reviewText}
+                        </p>
+                        <button
+                          onClick={() => setReviewsModalOpen(true)}
+                          className="text-[12px] font-bold text-gray-700 underline underline-offset-2 hover:text-blue-600 transition-colors text-left"
+                        >
+                          Read more
+                        </button>
+                      </div>
                     ))}
                   </div>
-                  {reviews.length > 3 && (
-                    <button
-                      onClick={() => setShowAllReviews(v => !v)}
-                      className="mt-4 flex items-center gap-1.5 text-[13px] font-bold text-gray-800 border border-gray-300 hover:border-gray-400 px-4 py-2 rounded-xl transition-colors"
-                    >
-                      {showAllReviews ? "Show fewer reviews" : `Show all ${reviews.length} reviews`}
-                      <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", showAllReviews && "rotate-180")} />
-                    </button>
-                  )}
+
+                  {/* Next arrow row */}
+                  <div className="flex items-center gap-3">
+                    {reviews.length > 3 && (
+                      <button
+                        onClick={() => setReviewsModalOpen(true)}
+                        className="flex items-center gap-2 border border-gray-300 hover:border-blue-400 hover:text-blue-600 text-gray-700 px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all"
+                      >
+                        View all {reviews.length} reviews
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </>
               )}
             </div>
@@ -890,7 +1211,11 @@ export default function PropertyDetailsPage() {
 
           {/* ══ RIGHT COLUMN: Booking Widget ══ */}
           <div className="lg:w-[310px] xl:w-[330px] flex-shrink-0 w-full">
-            <BookingWidget property={property} />
+            <BookingWidget
+              property={property}
+              onNightsChange={setBarNights}
+              onGuestsChange={setBarGuests}
+            />
           </div>
         </div>
 
@@ -923,8 +1248,19 @@ export default function PropertyDetailsPage() {
 
       <Footer />
 
+      {/* Reviews full modal */}
+      {reviewsModalOpen && (
+        <ReviewsModal
+          reviews={reviews}
+          rating={property.rating}
+          reviewCount={property.reviewCount}
+          onClose={() => setReviewsModalOpen(false)}
+        />
+      )}
+
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        @keyframes modalSlideUp { from { opacity: 0; transform: translateY(24px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
       `}</style>
     </div>
   );
