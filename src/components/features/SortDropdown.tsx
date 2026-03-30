@@ -1,14 +1,17 @@
 import { useState, useRef, useCallback } from "react";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import type { SortOption } from "@/types";
 import { cn } from "@/lib/utils";
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: "recommended", label: "Sort: Recommended" },
-  { value: "price_asc",   label: "Price: Low to High" },
-  { value: "price_desc",  label: "Price: High to Low" },
-  { value: "top_rated",   label: "Top Rated" },
-  { value: "most_popular", label: "Most Popular" },
+  { value: "recommended", label: "Recommended" },
+  { value: "price_asc", label: "Price: Low to high" },
+  { value: "price_desc", label: "Price: High to low" },
+  { value: "top_rated", label: "Top rated" },
+  { value: "most_popular", label: "Most reviewed" },
+  { value: "newest", label: "Newest listings" },
+  { value: "distance", label: "Distance from center" },
+  { value: "best_value", label: "Best value" },
 ];
 
 interface SortDropdownProps {
@@ -38,11 +41,14 @@ export default function SortDropdown({ value, onChange }: SortDropdownProps) {
       <button
         onClick={() => setOpen(o => !o)}
         className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[13px] font-semibold transition-all",
-          open ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+          "flex items-center gap-2 px-4 py-2 rounded-full border text-[13px] font-medium transition-all",
+          open
+            ? "border-gray-800 bg-white text-gray-900 shadow-sm"
+            : "border-gray-800 bg-white text-gray-800 hover:bg-gray-50"
         )}
       >
-        <span>{current?.label ?? "Sort"}</span>
+        <SlidersHorizontal className="w-4 h-4 text-gray-700" strokeWidth={2} />
+        <span>Sort By : {current?.label ?? "Recommended"}</span>
         <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", open && "rotate-180")} />
       </button>
 
@@ -53,10 +59,10 @@ export default function SortDropdown({ value, onChange }: SortDropdownProps) {
               key={opt.value}
               onClick={() => handleSelect(opt.value)}
               className={cn(
-                "w-full text-left px-4 py-2.5 text-[13px] transition-colors",
+                "w-full text-left px-4 py-2.5 text-[12px] transition-colors",
                 value === opt.value
-                  ? "text-blue-600 font-semibold bg-blue-50"
-                  : "text-gray-700 font-medium hover:bg-gray-50"
+                  ? "text-blue-600 font-semibold bg-blue-50/50"
+                  : "text-gray-600 font-medium hover:bg-gray-50"
               )}
             >
               {opt.label}

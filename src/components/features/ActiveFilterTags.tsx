@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { X, Star } from "lucide-react";
 import type { SearchFilters } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -57,18 +57,19 @@ export default function ActiveFilterTags({ filters, onRemove, onClearAll }: Acti
   if (tags.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2.5 mt-2 sm:mt-0">
       {tags.map((tag, i) => (
         <span
           key={i}
-          className="flex items-center gap-1.5 bg-blue-50 border border-blue-100 text-blue-700 text-[12px] font-semibold px-3 py-1 rounded-full"
+          className="flex items-center gap-2 bg-[#f4faff] border border-[#a2cbfe] text-[#0081ff] text-[13px] font-medium px-4 py-2 rounded-full"
         >
-          {tag.label}
+          {tag.label === "Rating 4+" && <><span className="font-medium">4</span><Star className="w-3.5 h-3.5 fill-[#facc15] text-[#facc15] mx-[-2px]" /></>}
+          {tag.label !== "Rating 4+" && tag.label}
           <button
             onClick={tag.onRemove}
-            className="w-4 h-4 rounded-full bg-blue-200 hover:bg-blue-300 flex items-center justify-center transition-colors flex-shrink-0"
+            className="flex items-center justify-center hover:opacity-75 transition-opacity ml-1"
           >
-            <X className="w-2.5 h-2.5 text-blue-700" />
+            <X className="w-4 h-4 text-[#0081ff]" strokeWidth={2.5} />
           </button>
         </span>
       ))}

@@ -12,51 +12,53 @@ interface FiltersSidebarProps {
   count?: number;
 }
 
-function Section({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen);
+function Section({ title, children, showClear = false, onClear, noBorder = false }: { title: string; children: React.ReactNode; showClear?: boolean; onClear?: () => void; noBorder?: boolean }) {
   return (
-    <div className="border-b border-gray-100 pb-4 mb-4">
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between mb-3 group"
-      >
-        <span className="text-[13px] font-bold text-gray-800">{title}</span>
-        {open
-          ? <ChevronUp className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
-          : <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />}
-      </button>
-      {open && <div>{children}</div>}
+    <div className={cn("pb-6 mb-6", !noBorder && "border-b border-dashed border-gray-200")}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-[17px] font-bold text-[#1A1A1A]">{title}</h3>
+        {showClear && (
+          <button onClick={onClear} className="text-[13px] font-semibold text-[#0396EF] hover:underline">
+            Clear all
+          </button>
+        )}
+      </div>
+      <div>{children}</div>
     </div>
   );
 }
 
-function CheckChip({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+function CheckChip({ label, checked, onChange, className }: { label: string; checked: boolean; onChange: (v: boolean) => void; className?: string }) {
   return (
     <button
       onClick={() => onChange(!checked)}
       className={cn(
-        "px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-all",
+        "px-3 py-2 rounded-[10px] text-[13px] font-medium border transition-all h-auto min-h-[38px] text-center flex items-center justify-center flex-1 min-w-[calc(50%-4px)]",
         checked
-          ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-          : "bg-gray-50 text-gray-700 border-gray-200 hover:border-blue-300 hover:text-blue-600"
+          ? "bg-[#0396EF]/[0.08] text-[#0396EF] border-[#0396EF]"
+          : "bg-white text-gray-500 border-gray-200 hover:border-gray-300",
+        className
       )}
     >
-      {label}
+      <span className="leading-tight">{label}</span>
     </button>
   );
 }
 
 function CheckRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <label className="flex items-center gap-2.5 cursor-pointer py-1 group">
+    <button
+      onClick={() => onChange(!checked)}
+      className="w-full flex items-center gap-2.5 cursor-pointer py-1.5 group text-left"
+    >
       <div className={cn(
         "w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all",
-        checked ? "bg-blue-600 border-blue-600" : "border-gray-300 group-hover:border-blue-400"
+        checked ? "bg-[#0396EF] border-[#0396EF]" : "border-gray-300 group-hover:border-[#0396EF]"
       )}>
-        {checked && <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3L3 5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+        {checked && <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3L3 5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
       </div>
-      <span className={cn("text-[13px] transition-colors", checked ? "text-gray-800 font-semibold" : "text-gray-600 group-hover:text-gray-800")}>{label}</span>
-    </label>
+      <span className={cn("text-[13px] transition-colors", checked ? "text-[#1A1A1A] font-semibold" : "text-gray-600 group-hover:text-[#1A1A1A]")}>{label}</span>
+    </button>
   );
 }
 
@@ -69,44 +71,52 @@ function toggleArr(arr: string[], val: string) {
 }
 
 function PriceSlider({ min, max, onMin, onMax }: { min: number; max: number; onMin: (v: number) => void; onMax: (v: number) => void }) {
-  const MIN = 0, MAX = 100000;
-  const pct1 = ((min - MIN) / (MAX - MIN)) * 100;
-  const pct2 = ((max - MIN) / (MAX - MIN)) * 100;
+  const MIN = 0, MAX = 15000;
+  const pct1 = (min / MAX) * 100;
+  const pct2 = (max / MAX) * 100;
 
   return (
-    <div>
-      <div className="relative h-5 my-3">
-        <div className="absolute inset-y-0 flex items-center w-full">
-          <div className="w-full h-1 bg-gray-200 rounded-full relative">
-            <div
-              className="absolute h-full bg-blue-500 rounded-full"
-              style={{ left: `${pct1}%`, right: `${100 - pct2}%` }}
-            />
-          </div>
-        </div>
+    <div className="mt-2">
+      <p className="text-[15px] font-semibold text-gray-700 mb-6">
+        Min - Max : <span className="font-bold text-[#1A1A1A]">₹ {min.toLocaleString()} - ₹ {max === MAX ? MAX.toLocaleString() + "+" : max.toLocaleString()}</span>
+      </p>
+      
+      <div className="relative h-6 flex items-center mb-8 px-1">
+        <div className="absolute w-full h-2 bg-gray-100 rounded-full" />
+        <div 
+          className="absolute h-2 bg-[#004772] rounded-full" 
+          style={{ left: `${pct1}%`, right: `${100 - pct2}%` }}
+        />
+        
+        {/* Continuous range effect handles */}
+        <div className="absolute w-6 h-6 bg-[#004772] rounded-full shadow-lg border-2 border-white pointer-events-none z-30" style={{ left: `calc(${pct1}% - 12px)` }} />
+        <div className="absolute w-6 h-6 bg-[#004772] rounded-full shadow-lg border-2 border-white pointer-events-none z-30" style={{ left: `calc(${pct2}% - 12px)` }} />
+
         <input
-          type="range" min={MIN} max={MAX} step={500} value={min}
+          type="range" min={MIN} max={MAX} step={100} value={min}
           onChange={e => { const v = +e.target.value; if (v < max) onMin(v); }}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          style={{ zIndex: 2 }}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-40"
         />
         <input
-          type="range" min={MIN} max={MAX} step={500} value={max}
+          type="range" min={MIN} max={MAX} step={100} value={max}
           onChange={e => { const v = +e.target.value; if (v > min) onMax(v); }}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          style={{ zIndex: 3 }}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50"
         />
       </div>
-      <div className="flex items-center justify-between">
-        <div className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1">
-          <p className="text-[9px] text-gray-400 font-semibold uppercase">Min</p>
-          <p className="text-[12px] font-bold text-gray-800">₹{min.toLocaleString("en-IN")}</p>
-        </div>
-        <div className="h-px flex-1 bg-gray-200 mx-2" />
-        <div className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-right">
-          <p className="text-[9px] text-gray-400 font-semibold uppercase">Max</p>
-          <p className="text-[12px] font-bold text-gray-800">₹{max.toLocaleString("en-IN")}</p>
-        </div>
+
+      <div className="flex justify-between px-0.5">
+        {[
+          { v: 0, label: "₹0" },
+          { v: 1000, label: "₹1000" },
+          { v: 4000, label: "₹4000" },
+          { v: 10000, label: "₹10,000" },
+          { v: 15000, label: "15k+" }
+        ].map(tick => (
+          <div key={tick.v} className="flex flex-col items-center">
+            <div className="w-0.5 h-1.5 bg-gray-200 mb-1" />
+            <span className="text-[11px] font-medium text-gray-400">{tick.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -114,27 +124,14 @@ function PriceSlider({ min, max, onMin, onMax }: { min: number; max: number; onM
 
 export default function FiltersSidebar({ filters, onChange, onReset, city = "New Delhi", count = 0 }: FiltersSidebarProps) {
   return (
-    <aside className="w-full lg:w-[220px] xl:w-[240px] flex-shrink-0">
-      <div className="bg-white rounded-2xl p-4 sticky top-20" style={{ boxShadow: "0 1px 8px rgba(0,0,0,0.07)" }}>
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[14px] font-bold text-gray-800">Filters</h2>
-          <button
-            onClick={onReset}
-            className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            <RotateCcw className="w-3 h-3" />
-            Reset all
-          </button>
-        </div>
-
-        {/* Map preview */}
-        <div className="mb-4">
+    <aside className="w-full lg:w-[320px] xl:w-[360px] flex-shrink-0">
+      {/* SECTION 1: Map and Price Range */}
+      <div className="bg-white rounded-[20px] p-6 shadow-[0_2px_15px_rgba(0,0,0,0.06)] border border-gray-100 mb-6">
+        <div className="mb-6">
           <MapPreview city={city} count={count} />
         </div>
-
-        {/* Price range */}
-        <Section title="Price Range">
+        
+        <Section title="Price Range" noBorder>
           <PriceSlider
             min={filters.priceMin}
             max={filters.priceMax}
@@ -142,51 +139,95 @@ export default function FiltersSidebar({ filters, onChange, onReset, city = "New
             onMax={v => onChange("priceMax", v)}
           />
         </Section>
+      </div>
+
+      {/* SECTION 2: All other filters - Sticky */}
+      <div className="bg-white rounded-[20px] p-6 sticky top-[132px] z-30 shadow-[0_2px_15px_rgba(0,0,0,0.06)] border border-gray-100">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-[17px] font-bold text-gray-800">Filters</h2>
+          <button
+            onClick={onReset}
+            className="text-[13px] font-semibold text-[#0396EF] hover:underline"
+          >
+            Clear all
+          </button>
+        </div>
 
         {/* Popular filters */}
         <Section title="Popular Filters">
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2 mt-1">
             {[
               { label: "Free cancellation", key: "freeCancellation" as const },
-              { label: "Breakfast", key: "breakfast" as const },
-              { label: "Parking", key: "parking" as const },
-              { label: "WiFi", key: "wifi" as const },
-              { label: "AC", key: "ac" as const },
+              { label: "Free breakfast", key: "breakfast" as const },
+              { label: "Private room", key: "privateRoom" as const },
+              { label: "Shared room", key: "sharedRoom" as const },
+              { label: "Double bed", key: "doubleBed" as const },
+              { label: "Couple friendly", key: "coupleFriendly" as const },
+              { label: "Free wifi", key: "wifi" as const },
+              { label: "Family friendly", key: "familyFriendly" as const },
             ].map(({ label, key }) => (
               <CheckChip
-                key={key}
+                key={label}
                 label={label}
-                checked={filters[key] as boolean}
-                onChange={v => onChange(key, v)}
+                checked={Boolean(filters[key as keyof SearchFilters])}
+                onChange={v => onChange(key as any, v)}
               />
             ))}
           </div>
         </Section>
-
+        
         {/* Guest rating */}
-        <Section title="Guest rating">
-          <div className="flex gap-2">
-            {[3, 4, 4.5].map(r => (
+        <Section title="Guest ratings">
+          <div className="mt-1 space-y-3">
+            <div className="flex flex-wrap gap-2">
               <button
-                key={r}
-                onClick={() => onChange("guestRating", filters.guestRating === r ? null : r)}
+                onClick={() => onChange("guestRating", filters.guestRating === 3 ? null : 3)}
                 className={cn(
-                  "flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[12px] font-semibold transition-all",
-                  filters.guestRating === r
-                    ? "bg-amber-400 border-amber-400 text-white shadow-sm"
-                    : "border-gray-200 text-gray-600 hover:border-amber-300"
+                  "px-3 py-2 rounded-[10px] text-[13px] font-medium border transition-all min-h-[38px] flex flex-1 items-center justify-center gap-1.5 min-w-[100px]",
+                  filters.guestRating === 3
+                    ? "bg-[#0396EF]/[0.08] text-[#0396EF] border-[#0396EF]"
+                    : "bg-white text-gray-500 border-gray-200"
                 )}
               >
-                <Star className={cn("w-3 h-3", filters.guestRating === r ? "fill-white text-white" : "fill-amber-400 text-amber-400")} />
-                {r}+
+                3 <Star className={cn("w-3.5 h-3.5", filters.guestRating === 3 ? "fill-[#0396EF] text-[#0396EF]" : "fill-amber-400 text-amber-400")} /> or above
               </button>
-            ))}
+              <button
+                onClick={() => onChange("guestRating", filters.guestRating === 4 ? null : 4)}
+                className={cn(
+                  "px-3 py-2 rounded-[10px] text-[13px] font-medium border transition-all min-h-[38px] w-12 flex items-center justify-center gap-1",
+                  filters.guestRating === 4
+                    ? "bg-[#0396EF]/[0.08] text-[#0396EF] border-[#0396EF]"
+                    : "bg-white text-gray-500 border-gray-200"
+                )}
+              >
+                4 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              </button>
+              <button
+                onClick={() => onChange("guestRating", filters.guestRating === 5 ? null : 5)}
+                className={cn(
+                  "px-3 py-2 rounded-[10px] text-[13px] font-medium border transition-all min-h-[38px] w-12 flex items-center justify-center gap-1",
+                  filters.guestRating === 5
+                    ? "bg-[#0396EF]/[0.08] text-[#0396EF] border-[#0396EF]"
+                    : "bg-white text-gray-500 border-gray-200"
+                )}
+              >
+                5 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <button className="flex-1 px-3 py-2 rounded-[10px] text-[12px] font-medium border border-gray-200 bg-white text-gray-500 min-h-[38px]">
+                Lowest to highest
+              </button>
+              <button className="flex-1 px-3 py-2 rounded-[10px] text-[12px] font-medium border border-gray-200 bg-white text-gray-500 min-h-[38px]">
+                Highest to lowest
+              </button>
+            </div>
           </div>
         </Section>
 
         {/* Property type */}
         <Section title="Property Type">
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {PROPERTY_TYPES.map(pt => (
               <CheckChip
                 key={pt}
@@ -213,7 +254,7 @@ export default function FiltersSidebar({ filters, onChange, onReset, city = "New
         </Section>
 
         {/* Bed type */}
-        <Section title="Bed Type" defaultOpen={false}>
+        <Section title="Bed Type" noBorder>
           <div className="space-y-0.5">
             {BED_TYPES.map(bt => (
               <CheckRow

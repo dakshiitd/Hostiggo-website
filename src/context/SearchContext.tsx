@@ -3,7 +3,7 @@ import type { SearchFilters, SearchState, SortOption, GuestCount } from "@/types
 
 const DEFAULT_FILTERS: SearchFilters = {
   priceMin: 0,
-  priceMax: 100000,
+  priceMax: 15000,
   guestRating: null,
   propertyTypes: [],
   amenities: [],
@@ -13,6 +13,11 @@ const DEFAULT_FILTERS: SearchFilters = {
   parking: false,
   wifi: false,
   ac: false,
+  privateRoom: false,
+  sharedRoom: false,
+  doubleBed: false,
+  coupleFriendly: false,
+  familyFriendly: false,
 };
 
 interface SearchContextType {

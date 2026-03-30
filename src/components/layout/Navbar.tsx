@@ -7,24 +7,29 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   return (
-    <nav className="bg-white sticky top-0 z-50 border-b border-gray-100" style={{ boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
+    <nav className="bg-white sticky top-0 z-50 border-b border-gray-50 shadow-[0_8px_30px_rgba(59,130,246,0.12)]">
       <div className="container-main">
-        <div className="flex items-center justify-between h-14">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-1.5 flex-shrink-0">
-            <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
-              <Home className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+          <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 group">
+            <div className="w-9 h-9 bg-[#004772] rounded-full flex items-center justify-center shadow-sm transition-transform group-hover:scale-105">
+              <span className="text-white font-bold text-[18px] leading-none">H</span>
             </div>
-            <span className="font-extrabold text-gray-900 text-[15px] tracking-tight">
-              Hosti<span className="text-blue-600">ggo</span>
-            </span>
+            <div className="flex items-baseline">
+              <span className="font-black text-[#374151] text-[17px] tracking-wider uppercase">
+                Hosti
+              </span>
+              <span className="font-black text-[#0086D8] text-[17px] tracking-wider uppercase">
+                ggo
+              </span>
+            </div>
           </Link>
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-0.5">
             <button className="flex items-center gap-1 text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors text-[13px] font-medium">
               <IndianRupee className="w-3.5 h-3.5" strokeWidth={2} />
-              <span>INR</span>
+              <span>INR.</span>
             </button>
             <button className="flex items-center gap-1 text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors text-[13px] font-medium">
               <Globe className="w-3.5 h-3.5" strokeWidth={1.8} />
@@ -34,8 +39,8 @@ export default function Navbar() {
             <button className="text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors text-[13px] font-medium ml-1">
               Sign in
             </button>
-            <button className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-4 py-1.5 rounded-lg text-[13px] font-semibold transition-colors ml-1 shadow-sm">
-              New user
+            <button className="bg-[#005a9c] hover:bg-[#004a80] active:bg-[#003a66] text-white px-4 py-1.5 rounded-lg text-[13px] font-semibold transition-colors ml-1 shadow-sm">
+              Host your home
             </button>
             <button
               onClick={() => navigate("/list-property")}

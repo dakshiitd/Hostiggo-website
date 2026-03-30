@@ -47,9 +47,9 @@ function applyFilters(properties: Property[], destination: string, filters: Sear
 function applySort(properties: Property[], sort: SortOption): Property[] {
   const arr = [...properties];
   switch (sort) {
-    case "price_asc":    return arr.sort((a, b) => a.price - b.price);
-    case "price_desc":   return arr.sort((a, b) => b.price - a.price);
-    case "top_rated":    return arr.sort((a, b) => b.rating - a.rating);
+    case "price_asc": return arr.sort((a, b) => a.price - b.price);
+    case "price_desc": return arr.sort((a, b) => b.price - a.price);
+    case "top_rated": return arr.sort((a, b) => b.rating - a.rating);
     case "most_popular": return arr.sort((a, b) => b.reviewCount - a.reviewCount);
     default: return arr;
   }
@@ -60,7 +60,7 @@ export default function SearchResultsPage() {
   const { search, updateSearch, filters, updateFilter, resetFilters, sort, setSort } = useSearchContext();
   const [page, setPage] = useState(1);
   const [mobileSidebar, setMobileSidebar] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("split");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [activeMapId, setActiveMapId] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -87,7 +87,7 @@ export default function SearchResultsPage() {
     if (key === "propertyTypes" && value) updateFilter("propertyTypes", filters.propertyTypes.filter(v => v !== value));
     else if (key === "amenities" && value) updateFilter("amenities", filters.amenities.filter(v => v !== value));
     else if (key === "bedTypes" && value) updateFilter("bedTypes", filters.bedTypes.filter(v => v !== value));
-    else if (key === "priceMin") { updateFilter("priceMin", 0); updateFilter("priceMax", 100000); }
+    else if (key === "priceMin") { updateFilter("priceMin", 0); updateFilter("priceMax", 15000); }
     else if (key === "guestRating") updateFilter("guestRating", null);
     else updateFilter(key, false as never);
   };
@@ -99,59 +99,17 @@ export default function SearchResultsPage() {
   const showList = viewMode === "list" || viewMode === "split";
 
   return (
-    <div className="min-h-screen bg-[#f0f2f5]">
+    <div className="min-h-screen bg-[#FFFEF9]">
       <Navbar />
 
       {/* Search bar strip */}
-      <div className="bg-white border-b border-gray-100 sticky top-14 z-40 py-2.5 px-4 sm:px-6 lg:px-8" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-        <div className="max-w-7xl mx-auto flex items-center gap-3">
-          <div className="flex-1 min-w-0">
+      <div className="bg-[#005a9c] sticky top-16 z-40 py-3.5 px-4 sm:px-6 lg:px-8 shadow-md">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
+          <div className="flex-1">
             <CompactSearchBar />
           </div>
 
-          {/* View toggle */}
-          <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-0.5 flex-shrink-0">
-            <button
-              onClick={() => setViewMode("list")}
-              title="List view"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${
-                viewMode === "list"
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <List className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">List</span>
-            </button>
-            <button
-              onClick={() => setViewMode("split")}
-              title="Split view"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${
-                viewMode === "split"
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <span className="text-[11px] font-bold hidden sm:inline">Split</span>
-              <span className="sm:hidden"><Map className="w-3.5 h-3.5" /></span>
-              <span className="hidden sm:flex items-center gap-0.5">
-                <div className="w-2 h-3 bg-current rounded-sm opacity-70" />
-                <div className="w-2 h-3 bg-current rounded-sm" />
-              </span>
-            </button>
-            <button
-              onClick={() => setViewMode("map")}
-              title="Map view"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${
-                viewMode === "map"
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <Map className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Map</span>
-            </button>
-          </div>
+          {/* View toggle moved to better align with the new design if necessary, but keeping it for now */}
         </div>
       </div>
 
@@ -159,7 +117,7 @@ export default function SearchResultsPage() {
       {viewMode === "map" && (
         <div className="flex" style={{ height: "calc(100vh - 112px)" }}>
           {/* Sidebar */}
-          <div className="hidden lg:block w-[240px] flex-shrink-0 overflow-y-auto bg-[#f0f2f5] p-4">
+          <div className="hidden lg:block w-[320px] flex-shrink-0 overflow-y-auto bg-[#FFFEF9] p-4">
             <FiltersSidebar
               filters={filters}
               onChange={updateFilter}
@@ -242,79 +200,7 @@ export default function SearchResultsPage() {
         </div>
       )}
 
-      {/* Split view */}
-      {viewMode === "split" && (
-        <div className="flex" style={{ height: "calc(100vh - 112px)" }}>
-          {/* Left: filters + list */}
-          <div className="flex overflow-y-auto bg-[#f0f2f5]" style={{ width: "52%", minWidth: 340 }}>
-            <div className="flex gap-4 p-4 w-full items-start">
-              {/* Sidebar */}
-              <div className="hidden xl:block flex-shrink-0" style={{ width: 220 }}>
-                <FiltersSidebar
-                  filters={filters}
-                  onChange={updateFilter}
-                  onReset={resetFilters}
-                  city={displayDest}
-                  count={sorted.length}
-                />
-              </div>
-              {/* List */}
-              <div className="flex-1 min-w-0" ref={listRef}>
-                <ResultsHeader
-                  dest={displayDest}
-                  count={sorted.length}
-                  sort={sort}
-                  setSort={setSort}
-                  onMobileFilter={() => setMobileSidebar(true)}
-                  filters={filters}
-                  onRemoveFilter={handleRemoveFilter}
-                  onClearAll={resetFilters}
-                />
-                <ListResults
-                  paginated={paginated}
-                  sorted={sorted}
-                  hasMore={hasMore}
-                  onLoadMore={() => setPage(pg => pg + 1)}
-                  onHover={setHoveredId}
-                  resetFilters={resetFilters}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile sidebar overlay */}
-          {mobileSidebar && (
-            <div className="fixed inset-0 z-50 xl:hidden">
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setMobileSidebar(false)} />
-              <div className="absolute left-0 top-0 bottom-0 w-[280px] bg-white overflow-y-auto p-4 shadow-2xl">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-bold text-gray-800 text-sm">Filters</h2>
-                  <button onClick={() => setMobileSidebar(false)} className="p-1.5 rounded-lg hover:bg-gray-100">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-                <FiltersSidebar
-                  filters={filters}
-                  onChange={updateFilter}
-                  onReset={() => { resetFilters(); setMobileSidebar(false); }}
-                  city={displayDest}
-                  count={sorted.length}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Right: sticky map */}
-          <div className="flex-1 sticky top-[112px] p-3" style={{ height: "calc(100vh - 112px)" }}>
-            <InteractiveMap
-              properties={sorted}
-              activeId={hoveredId}
-              onMarkerClick={setActiveMapId}
-              className="w-full h-full"
-            />
-          </div>
-        </div>
-      )}
+      {/* Removed Split view */}
 
       {viewMode !== "map" && <Footer />}
     </div>
@@ -336,23 +222,22 @@ interface ResultsHeaderProps {
 
 function ResultsHeader({ dest, count, sort, setSort, onMobileFilter, filters, onRemoveFilter, onClearAll }: ResultsHeaderProps) {
   return (
-    <div className="mb-4">
-      <h1 className="text-[18px] font-extrabold text-gray-800 capitalize">{dest}</h1>
-      <p className="text-[13px] text-gray-500 mt-0.5 font-medium">
+    <div className="mb-6">
+      <h1 className="text-3xl font-extrabold text-gray-900 capitalize mb-1.5">{dest}</h1>
+      <p className="text-[22px] text-gray-800 leading-snug mb-5">
         {count.toLocaleString("en-IN")} homestays found
       </p>
-      <div className="flex items-center gap-2 mt-3 flex-wrap">
+      <div className="flex flex-wrap items-center gap-3">
         <SortDropdown value={sort} onChange={setSort} />
+        <ActiveFilterTags filters={filters} onRemove={onRemoveFilter} onClearAll={onClearAll} />
+
         <button
           onClick={onMobileFilter}
-          className="xl:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-[13px] font-semibold text-gray-700 hover:border-gray-300 transition-all"
+          className="lg:hidden flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-gray-200 bg-white text-[13px] font-semibold text-gray-700 hover:border-gray-300 transition-all ml-auto"
         >
           <SlidersHorizontal className="w-3.5 h-3.5" />
-          Filters
+          More Filters
         </button>
-      </div>
-      <div className="mt-2">
-        <ActiveFilterTags filters={filters} onRemove={onRemoveFilter} onClearAll={onClearAll} />
       </div>
     </div>
   );
@@ -374,7 +259,7 @@ function ListResults({ paginated, sorted, hasMore, onLoadMore, onHover, resetFil
         <div className="text-5xl mb-4">🏨</div>
         <h3 className="text-lg font-bold text-gray-700 mb-2">No properties found</h3>
         <p className="text-gray-400 text-sm mb-4">Try adjusting your filters or search for a different destination.</p>
-        <button onClick={resetFilters} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors">
+        <button onClick={resetFilters} className="bg-primary-gradient text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-95">
           Clear all filters
         </button>
       </div>
