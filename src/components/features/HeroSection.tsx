@@ -1,5 +1,6 @@
 import heroBg from "@/assets/hero-bg.jpg";
 import SearchForm from "@/components/features/SearchForm";
+import { useAuth } from "@/context/AuthContext";
 
 import { cn } from "@/lib/utils";
 
@@ -14,6 +15,13 @@ const HERO_TAGS = [
 ];
 
 export default function HeroSection() {
+  const { session, profile, user } = useAuth();
+
+  // Build personalized greeting
+  const firstName = (profile?.full_name || user?.user_metadata?.full_name || "")
+    .split(" ")[0];
+  const isLoggedIn = !!session;
+
   return (
     <section className="bg-gray-50/50 pb-8 lg:pb-12 pt-5 lg:pt-8 flex items-center mt-3">
       <div className="container-main">
@@ -29,7 +37,11 @@ export default function HeroSection() {
               <img src={heroBg} alt="Lush green forest" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
               <div className="relative z-10 p-7 sm:p-9 flex flex-col h-full" style={{ minHeight: 400 }}>
-                <p className="text-white/90 text-sm font-medium tracking-wide mb-1">Discover your next</p>
+                <p className="text-white/90 text-sm font-medium tracking-wide mb-1">
+                  {isLoggedIn && firstName
+                    ? `Welcome back, ${firstName}! Find your next`
+                    : "Discover your next"}
+                </p>
                 <h1 className="text-white font-extrabold leading-[1.1] mb-auto" style={{ fontSize: "clamp(2.8rem,5vw,3.8rem)" }}>
                   Perfect stay
                 </h1>
