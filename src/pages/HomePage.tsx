@@ -12,7 +12,7 @@ import {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#FFFEF9]">
+    <div className="min-h-screen bg-[#f0f2f5]">
       <Navbar />
       <HeroSection />
       <div className="container-main py-8 space-y-10">

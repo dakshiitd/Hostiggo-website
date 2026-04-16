@@ -1,78 +1,80 @@
+import { ArrowRight, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
-import { Rocket } from "lucide-react";
+
+const CHART_BARS = [35, 60, 45, 88, 62, 75, 50, 92];
 
 export default function CTABanner() {
   return (
-    <section className="bg-[#FFFEF9] rounded-[24px] border-2 border-gray-200 py-10 px-6 md:px-12 shadow-[0_2px_16px_rgba(0,0,0,0.03)] my-10">
-      <h2 className="text-center text-xl md:text-[22px] font-extrabold text-gray-900 mb-10">
-        Want to earn effortlessly?
-      </h2>
+    <section className="rounded-3xl overflow-hidden">
+      <div
+        className="relative flex flex-col md:flex-row items-center justify-between gap-8 p-8 md:p-10"
+        style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)" }}
+      >
+        {/* Decorative blobs */}
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-blue-500 opacity-[0.07] blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 left-1/4 w-48 h-48 rounded-full bg-indigo-400 opacity-[0.07] blur-3xl pointer-events-none" />
 
-      <div className="flex flex-col md:flex-row items-center justify-between gap-10 md:gap-6 max-w-4xl mx-auto">
-        {/* Left Side: Copy */}
-        <div className="flex-1 max-w-[280px] text-center md:text-left order-2 md:order-1">
-          <p className="text-gray-700 text-[14px] leading-relaxed mb-4">
-            List your Homestay on Hostiggo and start receiving bookings from travellers.
+        {/* ── Left: Copy ── */}
+        <div className="relative z-10 flex-1 max-w-sm">
+          <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mb-2">
+            For property owners
           </p>
-          <p className="text-gray-900 font-extrabold text-[14px] mb-6">
-            Earn extra income NOW!!
+          <h2 className="text-white text-xl md:text-[22px] font-extrabold leading-snug mb-3">
+            Do you want to earn<br />effortlessly?
+          </h2>
+          <p className="text-slate-400 text-sm leading-relaxed">
+            List your homestay or property and start earning by hosting travellers from across India. Join thousands of hosts already earning on HostiGo.
           </p>
+
           <button
             onClick={() => toast.success("Redirecting to host registration…")}
-            className="inline-flex items-center justify-center bg-primary-gradient text-white px-7 py-2.5 rounded-xl font-bold text-[13px] transition-all shadow-md hover:shadow-lg active:scale-95"
+            className="mt-6 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-blue-900/30 group"
           >
             Get started
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </button>
         </div>
 
-        {/* Center: Character Image */}
-        <div className="flex-shrink-0 flex items-center justify-center w-[160px] md:w-[220px] order-1 md:order-2">
-          <img 
-            src="/host-celebration.png" 
-            alt="Celebrating Host" 
-            className="w-full h-auto object-contain drop-shadow-[0_20px_50px_rgba(59,130,246,0.4)] hover:-translate-y-2 transition-transform duration-500" 
-          />
-        </div>
-
-        {/* Right Side: Dark Card */}
-        <div className="flex-shrink-0 w-full md:w-[476px] md:h-[275px] order-3">
-          <div className="relative rounded-3xl p-8 shadow-3d hover:shadow-3d-hover hover:-translate-y-1.5 transition-all duration-300 overflow-hidden border border-slate-700 w-full h-full flex flex-col justify-between">
-            {/* Base Dark Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#1c2c3e] via-[#101b2a] to-[#0a111a]" />
-            {/* Background Texture (SVG Noise) */}
-            <div 
-              className="absolute inset-0 opacity-60 mix-blend-screen pointer-events-none" 
-              style={{ 
-                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CcomponentTransfer%3E%3CfeFuncR type='linear' slope='1.5'/%3E%3CfeFuncG type='linear' slope='1.5'/%3E%3CfeFuncB type='linear' slope='1.5'/%3E%3C/componentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='%23111827'/%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E")`,
-                backgroundRepeat: 'repeat'
-              }} 
-            />
-            {/* Lighting glow */}
-            <div className="absolute -top-16 -right-16 w-56 h-56 bg-blue-500 opacity-20 blur-[50px] rounded-full pointer-events-none" />
-            
-            <div className="relative z-10 flex flex-col h-full">
-              {/* Logo / Avatar bubble */}
-              <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-slate-900 font-bold text-[18px] mb-5 shadow-sm">
-                H
+        {/* ── Right: earnings card ── */}
+        <div className="relative z-10 flex-shrink-0">
+          <div className="bg-amber-400 rounded-2xl p-5 w-[220px] shadow-2xl shadow-black/30">
+            {/* Profile row */}
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-9 h-9 rounded-full bg-amber-600 flex items-center justify-center text-white text-sm font-bold">
+                R
               </div>
-
-              <div className="flex-1">
-                {/* Text 1 */}
-                <h3 className="text-white text-[16px] md:text-[18px] font-medium leading-tight mb-4 tracking-wide">
-                  First 10 bookings are 0% commission for all new hosts
-                </h3>
-                {/* Text 2 */}
-                <p className="text-white text-[15px] md:text-[16px] font-medium leading-snug tracking-wide mb-6">
-                  After that, only 2% platform commission applies (lowest to all other platforms)
-                </p>
+              <div>
+                <p className="text-amber-900 text-[12px] font-bold leading-tight">Rahul Kumar</p>
+                <p className="text-amber-700 text-[10px]">New Delhi · Host</p>
               </div>
+            </div>
 
-              {/* Badge */}
-              <div className="mt-auto">
-                <span className="text-[#FCE267] drop-shadow-md text-[20px] md:text-[24px] font-extrabold tracking-wide">
-                  Royal Deal
-                </span>
+            {/* Stat */}
+            <div className="bg-amber-500/50 rounded-xl p-3 mb-3">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-amber-900 text-[10px] font-semibold">Monthly Earnings</p>
+                <TrendingUp className="w-3 h-3 text-amber-900 opacity-70" />
               </div>
+              <p className="text-amber-900 text-lg font-extrabold">₹42,800</p>
+
+              {/* Mini bar chart */}
+              <div className="flex items-end gap-0.5 h-8 mt-2">
+                {CHART_BARS.map((h, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 bg-amber-700 rounded-t opacity-70"
+                    style={{ height: `${h}%` }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Badge */}
+            <div className="text-center">
+              <span className="text-amber-900 text-[11px] font-extrabold tracking-tight">
+                Rupi<span className="text-amber-700">Gold</span>
+              </span>
+              <p className="text-amber-800 text-[9px] mt-0.5 font-medium">Your earnings dashboard</p>
             </div>
           </div>
         </div>
