@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Heart, Star, ChevronDown, ArrowRight } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Heart, Star, ChevronDown, ArrowRight, Plus, Edit2, Check, List, Home, Wrench, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -10,7 +10,6 @@ interface WishlistProperty {
   id: string;
   name: string;
   location: string;
-  city: string;
   rating: number;
   reviews: number;
   price: number;
@@ -24,7 +23,6 @@ const INITIAL_WISHLISTS: WishlistProperty[] = [
     id: "w1",
     name: "ree ezz residency",
     location: "Noida, delhi",
-    city: "Noida",
     rating: 3.5,
     reviews: 512,
     price: 4500,
@@ -36,7 +34,6 @@ const INITIAL_WISHLISTS: WishlistProperty[] = [
     id: "w2",
     name: "gulu mulu homestay",
     location: "Noida, delhi",
-    city: "Noida",
     rating: 4.3,
     reviews: 178,
     price: 7999,
@@ -48,7 +45,6 @@ const INITIAL_WISHLISTS: WishlistProperty[] = [
     id: "w3",
     name: "ree ezz residency",
     location: "Noida, delhi",
-    city: "Noida",
     rating: 3.5,
     reviews: 512,
     price: 4500,
@@ -60,7 +56,6 @@ const INITIAL_WISHLISTS: WishlistProperty[] = [
     id: "w4",
     name: "gulu mulu homestay",
     location: "Noida, delhi",
-    city: "Noida",
     rating: 4.3,
     reviews: 178,
     price: 7999,
@@ -68,16 +63,118 @@ const INITIAL_WISHLISTS: WishlistProperty[] = [
     image: "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=600&h=450&fit=crop&q=80",
     liked: true,
   },
+  {
+    id: "w5",
+    name: "the cozy loft stay",
+    location: "Gurugram, delhi",
+    rating: 4.1,
+    reviews: 234,
+    price: 5800,
+    nights: 2,
+    image: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=600&h=450&fit=crop&q=80",
+    liked: true,
+  },
 ];
 
-type FilterOption = "Recently viewed" | "Price: Low to high" | "Price: High to low" | "Top rated";
-const FILTER_OPTIONS: FilterOption[] = ["Recently viewed", "Price: Low to high", "Price: High to low", "Top rated"];
+type FilterOption = {
+  value: string;
+  label: string;
+  icon: React.ReactNode;
+};
+
+const FILTER_OPTIONS: FilterOption[] = [
+  { value: "recently_viewed", label: "Recently viewed", icon: <Clock className="w-3.5 h-3.5" /> },
+  { value: "all", label: "All", icon: <List className="w-3.5 h-3.5" /> },
+  { value: "homestays", label: "Homestays", icon: <Home className="w-3.5 h-3.5" /> },
+  { value: "services", label: "Services", icon: <Wrench className="w-3.5 h-3.5" /> },
+];
+
+function FilterDropdown({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [showManage, setShowManage] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const current = FILTER_OPTIONS.find(o => o.value === value) ?? FILTER_OPTIONS[0];
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className={cn(
+          "flex items-center gap-2 border rounded-full px-4 py-2 text-[13px] font-semibold bg-white transition-all duration-200 select-none",
+          open
+            ? "border-gray-800 text-gray-900 shadow-md"
+            : "border-gray-300 text-gray-700 hover:border-gray-400 hover:shadow-sm"
+        )}
+      >
+        <span className="w-4 h-4 text-gray-400 flex-shrink-0">{current.icon}</span>
+        {current.label}
+        <ChevronDown
+          className={cn(
+            "w-4 h-4 text-gray-500 transition-transform duration-200",
+            open && "rotate-180"
+          )}
+        />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-[calc(100%+6px)] w-[190px] bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 animate-fade-in-down overflow-hidden">
+          {FILTER_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className={cn(
+                "w-full flex items-center justify-between gap-3 px-4 py-2.5 text-[13px] transition-colors duration-150 group",
+                opt.value === value
+                  ? "text-gray-900 font-semibold bg-gray-50"
+                  : "text-gray-600 font-medium hover:bg-gray-50 hover:text-gray-800"
+              )}
+            >
+              <span className="flex items-center gap-2.5">
+                <span className={cn("transition-colors", opt.value === value ? "text-blue-600" : "text-gray-400 group-hover:text-gray-500")}>
+                  {opt.icon}
+                </span>
+                {opt.label}
+              </span>
+              {opt.value === value && (
+                <Check className="w-4 h-4 text-blue-600 flex-shrink-0" strokeWidth={2.5} />
+              )}
+            </button>
+          ))}
+
+          {/* Divider */}
+          <div className="h-px bg-gray-100 my-1.5 mx-3" />
+
+          {/* Manage Lists */}
+          <button
+            onClick={() => { setOpen(false); }}
+            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors duration-150"
+          >
+            <List className="w-3.5 h-3.5 text-gray-400" />
+            Manage Lists
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function WishlistPage() {
   const [items, setItems] = useState<WishlistProperty[]>(INITIAL_WISHLISTS);
-  const [filter, setFilter] = useState<FilterOption>("Recently viewed");
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [filter, setFilter] = useState("recently_viewed");
   const navigate = useNavigate();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
   const toggleHeart = (id: string) => {
     setItems(prev => prev.map(p => p.id === id ? { ...p, liked: !p.liked } : p));
@@ -85,70 +182,100 @@ export default function WishlistPage() {
 
   const likedItems = items.filter(p => p.liked);
 
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 260, behavior: "smooth" });
+    }
+  };
+
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 4);
+    }
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) {
+      el.addEventListener("scroll", checkScroll);
+      checkScroll();
+      return () => el.removeEventListener("scroll", checkScroll);
+    }
+  }, [likedItems]);
+
   return (
     <div className="min-h-screen bg-[#FAFAFA] flex flex-col">
       <Navbar />
 
-      <main className="flex-1 container mx-auto max-w-6xl px-4 sm:px-6 py-10">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
         {/* Header */}
-        <div className="flex items-start justify-between mb-8 gap-4">
-          <h1 className="text-[28px] sm:text-[32px] font-extrabold text-gray-900">My wishlists</h1>
+        <h1 className="text-[30px] sm:text-[34px] font-extrabold text-gray-900 mb-6 tracking-tight">
+          My wishlists
+        </h1>
 
-          {/* Filter dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setFilterOpen(v => !v)}
-              className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2 text-[13px] font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm"
-            >
-              {filter}
-              <ChevronDown className={cn("w-4 h-4 text-gray-500 transition-transform", filterOpen && "rotate-180")} />
-            </button>
-            {filterOpen && (
-              <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-1 z-40 animate-fade-in-down">
-                {FILTER_OPTIONS.map(opt => (
-                  <button
-                    key={opt}
-                    onClick={() => { setFilter(opt); setFilterOpen(false); }}
-                    className={cn(
-                      "w-full text-left px-4 py-2.5 text-[13px] transition-colors",
-                      opt === filter
-                        ? "text-blue-600 font-semibold bg-blue-50/60"
-                        : "text-gray-600 hover:bg-gray-50"
-                    )}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            )}
+        {/* Controls row */}
+        <div className="flex items-center gap-3 mb-8">
+          {/* List filter icon */}
+          <button className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm">
+            <List className="w-4 h-4" />
+          </button>
+
+          {/* Dropdown */}
+          <FilterDropdown value={filter} onChange={setFilter} />
+
+          {/* Add new list */}
+          <button className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm">
+            <Plus className="w-4 h-4" />
+          </button>
+
+          {/* Edit button — right side */}
+          <div className="ml-auto flex items-center gap-1.5 text-[13px] font-semibold text-gray-600 cursor-pointer hover:text-gray-900 transition-colors">
+            <span>Edit</span>
+            <Edit2 className="w-3.5 h-3.5" />
           </div>
         </div>
 
-        {/* Cards grid */}
+        {/* Cards — horizontal scroll row */}
         {likedItems.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-16">
-            {likedItems.map((prop) => (
-              <WishlistCard
-                key={prop.id}
-                property={prop}
-                onToggleHeart={() => toggleHeart(prop.id)}
-                onClick={() => navigate(`/property/${prop.id}`)}
-              />
-            ))}
+          <div className="relative mb-14">
+            <div
+              ref={scrollRef}
+              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory"
+              style={{ scrollPaddingLeft: "0px" }}
+            >
+              {likedItems.map(prop => (
+                <div key={prop.id} className="flex-shrink-0 snap-start" style={{ width: "220px" }}>
+                  <WishlistCard
+                    property={prop}
+                    onToggleHeart={() => toggleHeart(prop.id)}
+                    onClick={() => navigate(`/property/${prop.id}`)}
+                  />
+                </div>
+              ))}
 
-            {/* Arrow nav button on last card */}
-            <div className="hidden xl:flex items-center justify-center">
-              <button className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:bg-gray-50 shadow-sm transition-colors">
+              {/* Spacer to allow last card to fully scroll into view */}
+              <div className="flex-shrink-0 w-2" />
+            </div>
+
+            {/* Right scroll arrow */}
+            {canScrollRight && (
+              <button
+                onClick={scrollRight}
+                className="absolute right-0 top-[90px] -translate-y-1/2 w-9 h-9 rounded-full border border-gray-200 bg-white shadow-md flex items-center justify-center hover:shadow-lg hover:scale-105 transition-all duration-200 z-10"
+              >
                 <ArrowRight className="w-4 h-4 text-gray-600" />
               </button>
-            </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-gray-400 text-lg">Your wishlist is empty.</p>
+            <div className="text-5xl mb-4">❤️</div>
+            <p className="text-gray-400 text-lg font-medium mb-1">Your wishlist is empty</p>
+            <p className="text-gray-400 text-sm mb-6">Start exploring and save your favourite stays.</p>
             <button
               onClick={() => navigate("/")}
-              className="mt-4 bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+              className="bg-[#1B3FA0] text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#162e82] transition-colors shadow-sm"
             >
               Explore stays
             </button>
@@ -156,15 +283,17 @@ export default function WishlistPage() {
         )}
 
         {/* End of list section */}
-        <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-10 mt-4">
+        <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-12 pt-4 pb-6">
           <img
             src={vacationIllustration}
             alt="Vacation illustration"
-            className="w-[160px] sm:w-[200px] object-contain"
+            className="w-[140px] sm:w-[175px] object-contain flex-shrink-0 drop-shadow-sm"
           />
-          <div>
-            <h3 className="text-[22px] sm:text-[26px] font-bold text-gray-900 mb-1.5">End of list</h3>
-            <p className="text-[15px] text-gray-500 leading-relaxed max-w-xs">
+          <div className="text-center sm:text-left">
+            <h3 className="text-[24px] sm:text-[28px] font-bold text-gray-900 mb-2 leading-tight">
+              End of list
+            </h3>
+            <p className="text-[15px] text-gray-500 leading-relaxed max-w-[280px]">
               Stay where comfort becomes an experience.
             </p>
           </div>
@@ -188,11 +317,12 @@ function WishlistCard({ property, onToggleHeart, onClick }: WishlistCardProps) {
 
   return (
     <div
-      className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group"
+      className="bg-white rounded-2xl overflow-hidden border border-gray-100 cursor-pointer group transition-all duration-250 hover:shadow-lg hover:-translate-y-0.5"
+      style={{ boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}
       onClick={onClick}
     >
       {/* Image */}
-      <div className="relative h-[200px] overflow-hidden">
+      <div className="relative overflow-hidden" style={{ height: "160px" }}>
         <img
           src={imgErr ? FALLBACK : property.image}
           alt={property.name}
@@ -203,28 +333,37 @@ function WishlistCard({ property, onToggleHeart, onClick }: WishlistCardProps) {
         {/* Heart */}
         <button
           onClick={e => { e.stopPropagation(); onToggleHeart(); }}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center hover:scale-110 transition-transform"
+          className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center hover:scale-110 active:scale-95 transition-transform duration-150"
         >
-          <Heart className={cn("w-4 h-4 transition-colors", property.liked ? "fill-rose-500 text-rose-500" : "text-gray-400")} />
+          <Heart
+            className={cn(
+              "w-3.5 h-3.5 transition-colors duration-200",
+              property.liked ? "fill-rose-500 text-rose-500" : "text-gray-400 fill-transparent"
+            )}
+          />
         </button>
       </div>
 
       {/* Info */}
-      <div className="p-4">
-        <h3 className="text-[15px] font-bold text-gray-900 mb-0.5 line-clamp-1">{property.name}</h3>
-        <p className="text-[12px] text-gray-500 mb-3">{property.location}</p>
+      <div className="p-3.5">
+        <h3 className="text-[13px] font-bold text-gray-900 mb-0.5 leading-snug line-clamp-1">
+          {property.name}
+        </h3>
+        <p className="text-[11.5px] text-gray-400 mb-2.5 leading-none">{property.location}</p>
 
         {/* Rating */}
-        <div className="flex items-center gap-1.5 mb-3">
-          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-          <span className="text-[13px] font-bold text-gray-700">{property.rating}</span>
-          <span className="text-[12px] text-gray-400">· {property.reviews} reviews</span>
+        <div className="flex items-center gap-1 mb-3">
+          <Star className="w-3 h-3 fill-amber-400 text-amber-400 flex-shrink-0" />
+          <span className="text-[12px] font-bold text-gray-700">{property.rating}</span>
+          <span className="text-[11px] text-gray-400">· {property.reviews} reviews</span>
         </div>
 
-        {/* Price badge */}
-        <div className="inline-flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5">
-          <span className="text-[13px] font-bold text-gray-900">₹ {property.price.toLocaleString("en-IN")}</span>
-          <span className="text-[12px] text-gray-400">/ {property.nights} Nights</span>
+        {/* Price */}
+        <div className="inline-flex items-center gap-1 bg-gray-50 border border-gray-100 rounded-lg px-2.5 py-1">
+          <span className="text-[12px] font-extrabold text-gray-900">
+            ₹ {property.price.toLocaleString("en-IN")}
+          </span>
+          <span className="text-[11px] text-gray-400">/ {property.nights} Nights</span>
         </div>
       </div>
     </div>
