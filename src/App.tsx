@@ -7,6 +7,7 @@ import PropertyDetailsPage from "@/pages/PropertyDetailsPage";
 import SignInPage from "@/pages/SignInPage";
 import OTPPage from "@/pages/OTPPage";
 import WishlistPage from "@/pages/WishlistPage";
+import MyMemoriesPage from "@/pages/MyMemoriesPage";
 import NotFound from "@/pages/NotFound";
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/otp" element={<OTPPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/my-memories" element={<MyMemoriesPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </SearchProvider>
