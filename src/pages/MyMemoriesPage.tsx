@@ -296,6 +296,10 @@ function BookingCard({ booking, onManage }: { booking: Booking; onManage: (b: Bo
       ? `${nights} night stay`
       : "Booking cancelled";
 
+  const statusColor =
+    booking.status === "upcoming" ? "text-[#1B3FA0]" :
+    booking.status === "completed" ? "text-emerald-600" : "text-red-500";
+
   const handleLocation = () => {
     const url = `https://www.google.com/maps?q=${booking.coordinates.lat},${booking.coordinates.lng}`;
     window.open(url, "_blank");
@@ -303,88 +307,90 @@ function BookingCard({ booking, onManage }: { booking: Booking; onManage: (b: Bo
 
   return (
     <div
-      className="bg-white rounded-2xl overflow-hidden border border-gray-100 group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
-      style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.06)" }}
+      className="bg-white rounded-[20px] overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
+      style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)" }}
     >
-      <div className="flex flex-col sm:flex-row">
-        {/* Image */}
-        <div className="relative w-full sm:w-[200px] h-[180px] sm:h-auto flex-shrink-0 overflow-hidden rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none">
+      <div className="flex flex-col sm:flex-row min-h-[160px]">
+
+        {/* ── Image ── */}
+        <div className="relative w-full sm:w-[240px] h-[200px] sm:h-auto flex-shrink-0 overflow-hidden rounded-t-[20px] sm:rounded-l-[20px] sm:rounded-tr-none">
           <img
             src={imgErr ? FALLBACK : booking.image}
             alt={booking.title}
             onError={() => setImgErr(true)}
             loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
           />
-          {/* Status ribbon */}
-          <div className={cn(
-            "absolute top-3 left-3 flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm",
-            booking.status === "upcoming" ? "bg-white text-blue-600 border border-blue-100" :
-            booking.status === "completed" ? "bg-white text-emerald-600 border border-emerald-100" :
-            "bg-white text-red-500 border border-red-100"
-          )}>
-            {booking.status === "upcoming" && <Clock className="w-3 h-3" />}
-            {booking.status === "completed" && <CheckCircle className="w-3 h-3" />}
-            {booking.status === "cancelled" && <XCircle className="w-3 h-3" />}
-            {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-          </div>
+          {/* Subtle gradient overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-transparent to-transparent pointer-events-none" />
         </div>
 
-        {/* Content */}
-        <div className="flex-1 p-5 flex flex-col min-w-0">
-          <h3 className="text-[15px] sm:text-[16px] font-bold text-gray-900 leading-snug mb-1.5 line-clamp-2 pr-2">
-            {booking.title}
-          </h3>
-          <p className="text-[12px] text-gray-400 mb-3 flex items-center gap-1">
-            <MapPin className="w-3 h-3 flex-shrink-0" />
-            {booking.distanceText}
-          </p>
+        {/* ── Content ── */}
+        <div className="flex-1 px-6 py-5 flex flex-col justify-between min-w-0">
+          <div>
+            {/* Title */}
+            <h3 className="text-[17px] font-bold text-gray-900 leading-snug mb-1.5 line-clamp-2">
+              {booking.title}
+            </h3>
 
-          {/* Location button */}
-          <button
-            onClick={handleLocation}
-            className="self-start flex items-center gap-2 border border-gray-200 text-gray-600 text-[12px] font-semibold px-3 py-1.5 rounded-lg hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-150 mb-4 group/loc"
-          >
-            <Navigation className="w-3.5 h-3.5 group-hover/loc:text-blue-500 transition-colors" />
-            Location
-          </button>
+            {/* Distance */}
+            <p className="text-[13px] text-gray-400 flex items-center gap-1.5 mb-5">
+              <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-gray-300" />
+              {booking.distanceText}
+            </p>
 
-          {/* Manage Booking */}
+            {/* Location + Share row */}
+            <div className="flex items-center gap-2.5 mb-5">
+              <button
+                onClick={handleLocation}
+                className="flex items-center gap-2 border border-gray-200 text-gray-600 text-[12.5px] font-semibold px-4 py-2 rounded-full hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
+              >
+                <Navigation className="w-3.5 h-3.5" />
+                Location
+              </button>
+              <button
+                className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600 hover:bg-gray-50 transition-all duration-200"
+                title="Share"
+              >
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Manage Booking CTA */}
           <button
             onClick={() => onManage(booking)}
-            className="self-start sm:mt-auto flex items-center gap-2 bg-[#1B3FA0] text-white text-[13px] font-bold px-4 py-2.5 rounded-xl hover:bg-[#162e82] active:scale-[0.98] transition-all duration-150 shadow-sm"
+            className="self-start bg-[#1B3FA0] text-white text-[13.5px] font-bold px-6 py-2.5 rounded-xl hover:bg-[#162e82] active:scale-[0.97] transition-all duration-200 shadow-sm hover:shadow-md"
           >
             Manage Booking
-            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Right: Dates panel */}
-        <div className="flex sm:flex-col items-center justify-between sm:justify-center gap-3 sm:gap-5 px-5 py-4 sm:px-8 border-t sm:border-t-0 sm:border-l border-dashed border-gray-200 sm:min-w-[170px]">
-          {/* Check-In */}
-          <div className="text-center flex-1 sm:flex-none">
-            <p className="text-[9.5px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Check-In</p>
-            <p className="text-[12px] sm:text-[13px] font-bold text-gray-800 whitespace-nowrap">{booking.checkIn}</p>
+        {/* ── Dates Panel ── */}
+        <div
+          className="flex sm:flex-col items-center justify-around sm:justify-center gap-3 sm:gap-6 px-6 py-5 sm:py-6 sm:min-w-[190px] border-t sm:border-t-0 sm:border-l border-gray-100 flex-shrink-0"
+          style={{ background: "#F8F9FC" }}
+        >
+          <div className="text-center">
+            <p className="text-[11px] font-bold text-gray-400 tracking-wider uppercase mb-1.5">Check-In</p>
+            <p className="text-[14px] font-bold text-gray-800 whitespace-nowrap leading-tight">{booking.checkIn}</p>
           </div>
 
-          <div className="text-gray-300 text-lg sm:hidden">·</div>
+          {/* Separator — horizontal dot on mobile, thin line on desktop */}
+          <div className="hidden sm:block w-8 h-px bg-gray-200" />
+          <div className="sm:hidden text-gray-300 font-bold">—</div>
 
-          {/* Check-Out */}
-          <div className="text-center flex-1 sm:flex-none">
-            <p className="text-[9.5px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Check-Out</p>
-            <p className="text-[12px] sm:text-[13px] font-bold text-gray-800 whitespace-nowrap">{booking.checkOut}</p>
+          <div className="text-center">
+            <p className="text-[11px] font-bold text-gray-400 tracking-wider uppercase mb-1.5">Check-Out</p>
+            <p className="text-[14px] font-bold text-gray-800 whitespace-nowrap leading-tight">{booking.checkOut}</p>
           </div>
 
-          {/* Status badge */}
-          <div className={cn(
-            "text-[12px] sm:text-[13px] font-extrabold whitespace-nowrap flex-shrink-0",
-            booking.status === "upcoming" ? "text-[#1B3FA0]" :
-            booking.status === "completed" ? "text-emerald-600" :
-            "text-red-500"
-          )}>
+          {/* Status */}
+          <p className={cn("text-[16px] sm:text-[17px] font-extrabold whitespace-nowrap mt-0 sm:mt-2", statusColor)}>
             {statusLabel}
-          </div>
+          </p>
         </div>
+
       </div>
     </div>
   );
