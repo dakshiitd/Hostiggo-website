@@ -74,11 +74,14 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center">
-              <Home className="w-2.5 h-2.5 text-white" strokeWidth={2.5} />
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center">
+                <Home className="w-2.5 h-2.5 text-white" strokeWidth={2.5} />
+              </div>
+              <p className="text-gray-400 text-xs">© 2025 Hostiggo · your-home-stays.com</p>
             </div>
-            <p className="text-gray-400 text-xs">© 2025 Hostiggo · your-home-stays.com</p>
+            <p className="text-gray-400 text-xs pl-7">Hostiggo Trips Private Limited · A-176-A, Basement, Ganesh Nagar, Tilak Nagar, New Delhi – 110018</p>
           </div>
           <div className="flex items-center gap-4">
             <button className="flex items-center gap-1 text-gray-500 hover:text-gray-700 text-xs transition-colors">
